@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SocialBee — AI Social Media Manager for The Wichitan</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐝</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { 50: '#eef2ff', 100: '#dce4ff', 200: '#b9c9ff', 300: '#8ba6ff', 400: '#5c7cff', 500: '#1e3a8a', 600: '#1a3278', 700: '#152a66', 800: '#0f1f4d', 900: '#0a1533', 950: '#050a19' },
+            accent: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
+            bee: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' }
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    * { font-family: 'Inter', sans-serif; }
+    body { margin: 0; background: #f8fafc; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.4); } 50% { box-shadow: 0 0 20px 5px rgba(59,130,246,0.2); } }
+    .pulse-glow { animation: pulse-glow 2s infinite; }
+    @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .spin-slow { animation: spin-slow 3s linear infinite; }
+    .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .gradient-navy { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%); }
+    .gradient-card { background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%); }
+    .text-gradient { background: linear-gradient(135deg, #1e3a8a, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" data-type="module">
+    const { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } = React;
+
+    // ============================================
+    // DATA & CONSTANTS
+    // ============================================
+    const VIRAL_RESEARCH = {
+      optimalTimes: {
+        instagram: { best: ["Tuesday 1PM", "Wednesday 1PM", "Thursday 1PM"], worst: ["Friday", "Saturday morning"] },
+        tiktok: { best: ["Tuesday 7PM", "Wednesday 8PM", "Thursday 6PM"], worst: ["Monday morning", "Sunday morning"] },
+        twitter: { best: ["Monday 8AM", "Tuesday 9AM", "Thursday 10AM"], worst: ["Weekend evenings"] },
+        facebook: { best: ["Wednesday 11AM", "Thursday 1PM", "Friday 10AM"], worst: ["Saturday", "Sunday morning"] }
+      },
+      contentFormulas: [
+        { name: "Breaking News", formula: "🚨 Hook → Key Facts → Link to Full Story", platforms: ["twitter", "instagram"], engagement: "High" },
+        { name: "Carousel Explainer", formula: "Hook Slide → 5-8 Value Slides → CTA Slide", platforms: ["instagram"], engagement: "Very High" },
+        { name: "Student Spotlight", formula: "Relatable Hook → Personal Story → Lesson → CTA", platforms: ["instagram", "tiktok"], engagement: "High" },
+        { name: "Quick Take / Hot Take", formula: "Contrarian Statement → Evidence → Why It Matters", platforms: ["twitter", "tiktok"], engagement: "Very High" },
+        { name: "Behind the Scenes", formula: "Show Process → Fun Detail → Follow CTA", platforms: ["tiktok", "instagram"], engagement: "Medium-High" },
+        { name: "Poll / Engagement", formula: "Compelling Question → 2-4 Options → Follow-up", platforms: ["instagram", "twitter"], engagement: "High" },
+        { name: "Edutainment", formula: "Problem → Solution Steps → Key Takeaway", platforms: ["tiktok", "instagram"], engagement: "Very High" }
+      ],
+      benchmarks: {
+        tiktok: { avgEngagement: "3.70%", goal: "5%+" },
+        instagram: { avgEngagement: "0.48%", carouselAvg: "1.92%", goal: "2%+" },
+        twitter: { avgEngagement: "0.12%", goal: "0.5%+" },
+        facebook: { avgEngagement: "0.15%", goal: "0.5%+" }
+      },
+      captionTemplates: {
+        breaking: { template: "🚨 [BREAKING] {headline}. {context}. Full story → link in bio.", example: "🚨 [BREAKING] MSU announces new parking policy. All student lots affected starting May. Full story → link in bio." },
+        opinion: { template: "{hot_take}. Here's why → {brief_reason}. What do you think? 👇", example: "Unpopular opinion: 8 AM classes should be banned. Here's why → Studies show students retain 40% less before 9 AM. What do you think? 👇" },
+        spotlight: { template: "Meet {name}, a {year} {major} who {interesting_fact}. {quote}. 🎓 More student stories → follow us!", example: "Meet Jordan, a junior art major who painted a 30ft mural on campus. \"I wanted everyone to feel seen.\" 🎓 More student stories → follow us!" },
+        event: { template: "📅 {event_name} is {timing}! {details}. Don't miss it → {cta}", example: "📅 Spring Fest is THIS Friday! Live music, food trucks, and free merch. Don't miss it → Tag who you're bringing! 👇" },
+        carousel: { template: "{number_hook} about {topic} that every MSU student should know 🧵👇 [Swipe →]", example: "5 things about the new dining hall that every MSU student should know 🧵👇 [Swipe →]" }
+      },
+      ctas: {
+        engagement: ["Tag someone who needs to see this", "Double-tap if you agree 💛", "Save this for later 📌", "Comment your take below 👇", "Share to your story if this hits home"],
+        growth: ["Follow @thewichitan for more campus news", "Turn on post notifications 🔔", "Share with a Mustang who needs to know"],
+        traffic: ["Full story → link in bio", "Read more at thewichitan.com", "Swipe up for the full article"],
+        tiktok: ["Follow for more MSU content", "Comment what you think", "Share with your roommate", "Stitch this with your take"]
+      }
+    };
+
+    const INITIAL_DRAFTS = [
+      {
+        id: "d1", title: "Spring Fest 2026 Lineup Announcement", type: "event", status: "draft",
+        platforms: ["instagram", "twitter", "facebook", "tiktok"],
+        caption: "📅 Spring Fest 2026 is HERE! 🎉 This year's lineup includes live performances, food trucks from 12 local vendors, and a surprise headliner reveal at 8 PM. Don't miss Wichita Falls' biggest campus event!\n\nTag who you're bringing! 👇\n\n#MSUTexas #SpringFest2026 #TheWichitan #CampusLife",
+        imagePrompt: "Vibrant college spring festival poster with navy blue and gold colors, showing crowds of happy students, food trucks, and a stage with lights, modern graphic design style",
+        scheduledTime: null, createdAt: "2026-03-25T10:00:00", contentFormula: "Event Announcement",
+        viralScore: 87, suggestedTime: "Thursday 1:00 PM", aiNotes: "High engagement potential — events + lineup reveals drive saves and shares. Use carousel format on Instagram for maximum reach."
+      },
+      {
+        id: "d2", title: "Opinion: Why MSU Needs More Study Spaces", type: "opinion", status: "draft",
+        platforms: ["instagram", "twitter"],
+        caption: "Unpopular opinion: MSU doesn't have enough study spaces — and it's hurting student performance. 📚\n\nWith finals approaching, the library is packed by 10 AM. Here's what students are saying about the crisis, and what the university could do about it.\n\nWhat's your go-to study spot? Comment below 👇\n\nFull story → link in bio\n\n#MSUTexas #StudentLife #TheWichitan #CampusIssues",
+        imagePrompt: "Crowded university library with students studying at every table, some sitting on floors, editorial photography style with navy blue overlay",
+        scheduledTime: null, createdAt: "2026-03-25T14:00:00", contentFormula: "Opinion / Hot Take",
+        viralScore: 92, suggestedTime: "Wednesday 1:00 PM", aiNotes: "Opinion pieces with relatable campus issues drive highest comment engagement. The question CTA will boost algorithm ranking."
+      },
+      {
+        id: "d3", title: "Student Spotlight: Maya Chen - Campus Muralist", type: "spotlight", status: "approved",
+        platforms: ["instagram", "tiktok"],
+        caption: "Meet Maya Chen, a junior art major who's transforming campus one wall at a time. 🎨\n\nHer latest piece — a 30ft mural outside the student center — took 3 weeks and 47 cans of spray paint. \"I wanted every student to feel represented when they walk by.\"\n\nKnow someone doing amazing things on campus? Tag them below! 👇\n\n#MSUTexas #StudentSpotlight #CampusArt #TheWichitan",
+        imagePrompt: "Young female college student painting a large colorful mural on a university building wall, vibrant colors, editorial photography",
+        scheduledTime: "2026-03-27T13:00:00", createdAt: "2026-03-24T09:00:00", contentFormula: "Student Spotlight",
+        viralScore: 78, suggestedTime: "Thursday 1:00 PM", aiNotes: "Student spotlights build community loyalty. Pair with a short TikTok reel of the painting process for maximum cross-platform reach."
+      }
+    ];
+
+    const PLATFORM_ICONS = {
+      instagram: { color: "#E1306C", name: "Instagram", abbr: "IG" },
+      twitter: { color: "#1DA1F2", name: "X (Twitter)", abbr: "X" },
+      facebook: { color: "#4267B2", name: "Facebook", abbr: "FB" },
+      tiktok: { color: "#000000", name: "TikTok", abbr: "TT" }
+    };
+
+    const ANALYTICS_DATA = {
+      totalReach: 24830, reachGrowth: 23.5,
+      totalEngagement: 3420, engagementGrowth: 18.2,
+      totalFollowers: 2847, followerGrowth: 12.8,
+      totalPosts: 47, postGrowth: 35.0,
+      weeklyReach: [
+        { day: "Mon", instagram: 1200, twitter: 800, facebook: 400, tiktok: 2100 },
+        { day: "Tue", instagram: 1800, twitter: 1200, facebook: 600, tiktok: 3200 },
+        { day: "Wed", instagram: 2400, twitter: 1500, facebook: 800, tiktok: 4100 },
+        { day: "Thu", instagram: 2100, twitter: 1300, facebook: 700, tiktok: 3800 },
+        { day: "Fri", instagram: 1600, twitter: 900, facebook: 500, tiktok: 2900 },
+        { day: "Sat", instagram: 900, twitter: 600, facebook: 300, tiktok: 1800 },
+        { day: "Sun", instagram: 1100, twitter: 700, facebook: 350, tiktok: 2200 }
+      ],
+      topPosts: [
+        { title: "Campus Parking Changes", reach: 8420, engagement: 12.3, platform: "tiktok" },
+        { title: "Spring Break Guide", reach: 6200, engagement: 8.7, platform: "instagram" },
+        { title: "SGA Election Results", reach: 5100, engagement: 15.1, platform: "twitter" }
+      ],
+      platformBreakdown: [
+        { platform: "instagram", followers: 1240, engagement: "2.1%", posts: 18 },
+        { platform: "twitter", followers: 890, engagement: "0.8%", posts: 24 },
+        { platform: "facebook", followers: 320, engagement: "0.4%", posts: 12 },
+        { platform: "tiktok", followers: 397, engagement: "4.2%", posts: 8 }
+      ]
+    };
+
+    // ============================================
+    // CONTEXT
+    // ============================================
+    const AppContext = createContext();
+
+    // ============================================
+    // ICONS (SVG components)
+    // ============================================
+    const Icon = ({ name, size = 20, className = "" }) => {
+      const icons = {
+        home: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+        plus: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+        file: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
+        calendar: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+        chart: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
+        link: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+        brain: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 3 2 5.5 4 7.5L12 22l3-5.5c2-2 4-4.5 4-7.5a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>,
+        send: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
+        check: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+        x: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+        edit: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+        clock: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+        trending: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+        users: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+        eye: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+        heart: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
+        sparkle: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg>,
+        settings: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+        zap: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+        target: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+        arrowUp: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>,
+        arrowRight: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
+        menu: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
+        image: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>,
+        copy: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
+        refresh: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+        bee: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="7"/><path d="M12 6V2"/><path d="M8 4l4 2 4-2"/><line x1="7" y1="11" x2="17" y2="11"/><line x1="7" y1="15" x2="17" y2="15"/></svg>,
+        info: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
+        filter: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>,
+        search: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+      };
+      return <span className={`inline-flex ${className}`}>{icons[name] || icons.home}</span>;
+    };
+
+    // ============================================
+    // SIDEBAR
+    // ============================================
+    const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) => {
+      const navItems = [
+        { id: "dashboard", icon: "home", label: "Dashboard" },
+        { id: "create", icon: "sparkle", label: "AI Creator" },
+        { id: "drafts", icon: "file", label: "Drafts" },
+        { id: "schedule", icon: "calendar", label: "Schedule" },
+        { id: "analytics", icon: "chart", label: "Analytics" },
+        { id: "insights", icon: "brain", label: "Viral Insights" },
+        { id: "connect", icon: "link", label: "Connect" },
+      ];
+      return (
+        <div className={`fixed top-0 left-0 h-full z-50 transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-20'} gradient-navy text-white flex flex-col shadow-2xl`}>
+          <div className="p-4 flex items-center gap-3 border-b border-white/10">
+            <div className="w-10 h-10 rounded-xl bg-bee-500 flex items-center justify-center text-navy-900 font-black text-lg flex-shrink-0">
+              SB
+            </div>
+            {sidebarOpen && (
+              <div className="fade-in">
+                <h1 className="font-bold text-lg leading-tight">SocialBee</h1>
+                <p className="text-xs text-blue-200 opacity-70">The Wichitan AI</p>
+              </div>
+            )}
+          </div>
+          <nav className="flex-1 py-4 px-2 space-y-1">
+            {navItems.map(item => (
+              <button key={item.id} onClick={() => { setCurrentPage(item.id); if (window.innerWidth < 1024) setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 ${
+                  currentPage === item.id ? 'bg-white/20 text-white shadow-lg' : 'text-blue-200 hover:bg-white/10 hover:text-white'
+                }`}>
+                <span className="flex-shrink-0 w-8 flex justify-center"><Icon name={item.icon} size={20} /></span>
+                {sidebarOpen && <span className="font-medium text-sm fade-in">{item.label}</span>}
+              </button>
+            ))}
+          </nav>
+          <div className="p-3 border-t border-white/10">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-blue-200 hover:bg-white/10 hover:text-white transition-all">
+              <span className="flex-shrink-0 w-8 flex justify-center"><Icon name="menu" size={20} /></span>
+              {sidebarOpen && <span className="font-medium text-sm">Collapse</span>}
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    // ============================================
+    // STAT CARD
+    // ============================================
+    const StatCard = ({ icon, label, value, growth, color = "accent" }) => (
+      <div className="gradient-card rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="flex items-center justify-between mb-3">
+          <div className={`w-10 h-10 rounded-xl bg-${color}-100 flex items-center justify-center text-${color}-600`}>
+            <Icon name={icon} size={18} />
+          </div>
+          {growth > 0 && (
+            <span className="flex items-center gap-1 text-emerald-600 text-xs font-semibold bg-emerald-50 px-2 py-1 rounded-full">
+              <Icon name="arrowUp" size={12} /> {growth}%
+            </span>
+          )}
+        </div>
+        <p className="text-2xl font-bold text-navy-800">{typeof value === 'number' ? value.toLocaleString() : value}</p>
+        <p className="text-sm text-slate-500 mt-1">{label}</p>
+      </div>
+    );
+
+    // ============================================
+    // PLATFORM BADGE
+    // ============================================
+    const PlatformBadge = ({ platform, small = false }) => {
+      const p = PLATFORM_ICONS[platform];
+      if (!p) return null;
+      return (
+        <span className={`inline-flex items-center gap-1 ${small ? 'px-1.5 py-0.5 text-xs' : 'px-2 py-1 text-xs'} rounded-full font-medium`}
+          style={{ background: p.color + '15', color: p.color }}>
+          {p.abbr}
+        </span>
+      );
+    };
+
+    // ============================================
+    // VIRAL SCORE BADGE
+    // ============================================
+    const ViralScore = ({ score }) => {
+      const color = score >= 85 ? 'emerald' : score >= 70 ? 'amber' : 'red';
+      return (
+        <div className={`flex items-center gap-2 bg-${color}-50 px-3 py-1.5 rounded-full`}>
+          <Icon name="zap" size={14} className={`text-${color}-600`} />
+          <span className={`text-sm font-bold text-${color}-700`}>{score}</span>
+          <span className={`text-xs text-${color}-600`}>Viral Score</span>
+        </div>
+      );
+    };
+
+    // ============================================
+    // MINI BAR CHART
+    // ============================================
+    const MiniBarChart = ({ data, dataKeys, colors }) => {
+      const maxVal = Math.max(...data.map(d => dataKeys.reduce((sum, k) => sum + (d[k] || 0), 0)));
+      return (
+        <div className="flex items-end gap-2 h-40 mt-4">
+          {data.map((d, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              <div className="w-full flex flex-col-reverse gap-0.5" style={{ height: '120px' }}>
+                {dataKeys.map((key, ki) => {
+                  const h = (d[key] / maxVal) * 100;
+                  return <div key={key} className="w-full rounded-t" style={{ height: `${h}%`, background: colors[ki], minHeight: d[key] > 0 ? '2px' : '0' }} />;
+                })}
+              </div>
+              <span className="text-xs text-slate-500 font-medium">{d.day}</span>
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    // ============================================
+    // DASHBOARD PAGE
+    // ============================================
+    const DashboardPage = () => {
+      const { drafts } = useContext(AppContext);
+      const pendingDrafts = drafts.filter(d => d.status === 'draft');
+      const approvedDrafts = drafts.filter(d => d.status === 'approved');
+      return (
+        <div className="fade-in space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-navy-800">Welcome back, Shehan</h2>
+            <p className="text-slate-500 mt-1">Here's how The Wichitan is performing across platforms.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard icon="eye" label="Total Reach" value={ANALYTICS_DATA.totalReach} growth={ANALYTICS_DATA.reachGrowth} />
+            <StatCard icon="heart" label="Engagements" value={ANALYTICS_DATA.totalEngagement} growth={ANALYTICS_DATA.engagementGrowth} />
+            <StatCard icon="users" label="Followers" value={ANALYTICS_DATA.totalFollowers} growth={ANALYTICS_DATA.followerGrowth} />
+            <StatCard icon="trending" label="Posts This Month" value={ANALYTICS_DATA.totalPosts} growth={ANALYTICS_DATA.postGrowth} />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-navy-800">Weekly Reach by Platform</h3>
+                <div className="flex gap-3">
+                  {[{label:"IG", color:"#E1306C"},{label:"X", color:"#1DA1F2"},{label:"FB", color:"#4267B2"},{label:"TT", color:"#000"}].map(p => (
+                    <span key={p.label} className="flex items-center gap-1 text-xs text-slate-600">
+                      <span className="w-2.5 h-2.5 rounded-full" style={{background: p.color}} /> {p.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <MiniBarChart data={ANALYTICS_DATA.weeklyReach} dataKeys={["instagram","twitter","facebook","tiktok"]} colors={["#E1306C","#1DA1F2","#4267B2","#000"]} />
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <h3 className="font-semibold text-navy-800 mb-4">Quick Actions</h3>
+              <div className="space-y-3">
+                <QuickAction icon="sparkle" label="Create AI Post" desc="Generate viral content" page="create" />
+                <QuickAction icon="file" label="Review Drafts" desc={`${pendingDrafts.length} pending approval`} page="drafts" />
+                <QuickAction icon="calendar" label="View Schedule" desc={`${approvedDrafts.length} posts scheduled`} page="schedule" />
+                <QuickAction icon="brain" label="Viral Insights" desc="Competitor analysis" page="insights" />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <h3 className="font-semibold text-navy-800 mb-4">Top Performing Posts</h3>
+              <div className="space-y-3">
+                {ANALYTICS_DATA.topPosts.map((post, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className="w-8 h-8 rounded-lg gradient-navy text-white flex items-center justify-center text-sm font-bold">{i + 1}</span>
+                      <div>
+                        <p className="font-medium text-sm text-navy-800">{post.title}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <PlatformBadge platform={post.platform} small />
+                          <span className="text-xs text-slate-500">{post.reach.toLocaleString()} reach</span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-emerald-600 font-bold text-sm">{post.engagement}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <h3 className="font-semibold text-navy-800 mb-4">Platform Performance</h3>
+              <div className="space-y-3">
+                {ANALYTICS_DATA.platformBreakdown.map((p, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{background: PLATFORM_ICONS[p.platform]?.color}}>
+                        {PLATFORM_ICONS[p.platform]?.abbr}
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm text-navy-800">{PLATFORM_ICONS[p.platform]?.name}</p>
+                        <p className="text-xs text-slate-500">{p.followers.toLocaleString()} followers · {p.posts} posts</p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-bold text-navy-700">{p.engagement}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const QuickAction = ({ icon, label, desc, page }) => {
+      const { setCurrentPage } = useContext(AppContext);
+      return (
+        <button onClick={() => setCurrentPage(page)} className="w-full flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-accent-50 hover:border-accent-200 border border-transparent transition-all text-left group">
+          <div className="w-9 h-9 rounded-lg bg-accent-100 flex items-center justify-center text-accent-600 group-hover:bg-accent-200 transition-colors">
+            <Icon name={icon} size={16} />
+          </div>
+          <div>
+            <p className="font-medium text-sm text-navy-800">{label}</p>
+            <p className="text-xs text-slate-500">{desc}</p>
+          </div>
+          <Icon name="arrowRight" size={16} className="ml-auto text-slate-400 group-hover:text-accent-500 transition-colors" />
+        </button>
+      );
+    };
+
+    // ============================================
+    // AI CREATOR PAGE
+    // ============================================
+    const CreatePage = () => {
+      const { drafts, setDrafts } = useContext(AppContext);
+      const [topic, setTopic] = useState("");
+      const [contentType, setContentType] = useState("news");
+      const [selectedPlatforms, setSelectedPlatforms] = useState(["instagram", "twitter"]);
+      const [tone, setTone] = useState("informative");
+      const [generating, setGenerating] = useState(false);
+      const [generated, setGenerated] = useState(null);
+
+      const contentTypes = [
+        { id: "news", label: "Breaking News", icon: "zap" },
+        { id: "opinion", label: "Opinion Piece", icon: "edit" },
+        { id: "spotlight", label: "Student Spotlight", icon: "users" },
+        { id: "event", label: "Event / Announcement", icon: "calendar" },
+        { id: "carousel", label: "Carousel / Explainer", icon: "image" },
+        { id: "behindscenes", label: "Behind the Scenes", icon: "eye" },
+      ];
+
+      const tones = ["informative", "conversational", "urgent", "inspiring", "humorous"];
+
+      const togglePlatform = (p) => {
+        setSelectedPlatforms(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
+      };
+
+      const generateContent = () => {
+        if (!topic.trim()) return;
+        setGenerating(true);
+        setTimeout(() => {
+          const templates = VIRAL_RESEARCH.captionTemplates;
+          const typeMap = { news: "breaking", opinion: "opinion", spotlight: "spotlight", event: "event", carousel: "carousel", behindscenes: "spotlight" };
+          const tmpl = templates[typeMap[contentType]] || templates.breaking;
+
+          const captions = {
+            news: `🚨 [BREAKING] ${topic}\n\nThis is developing — here's what we know so far. MSU students are already reacting, and administration has yet to comment.\n\nStay tuned for updates. Full story → link in bio.\n\nWhat's your reaction? Drop it below 👇\n\n#MSUTexas #TheWichitan #BreakingNews #CampusNews`,
+            opinion: `Hot take: ${topic} — and here's why it matters more than you think. 🔥\n\nWe break down both sides, but one argument is clearly winning. The data doesn't lie.\n\nAgree or disagree? Let us know in the comments 👇\n\nFull opinion piece → link in bio\n\n#MSUTexas #TheWichitan #Opinion #CampusVoices`,
+            spotlight: `Meet the MSU student who's changing the game. 🌟\n\n${topic}\n\nTheir story is one you won't want to miss — from humble beginnings to campus legend status.\n\nKnow someone doing amazing things? Tag them! 👇\n\n#MSUTexas #TheWichitan #StudentSpotlight #MustangPride`,
+            event: `📅 Mark your calendars, Mustangs!\n\n${topic}\n\nThis is THE event you don't want to miss this semester. Bring your friends, bring your energy.\n\nTag who you're going with! 👇\n\n#MSUTexas #TheWichitan #CampusEvents #MustangLife`,
+            carousel: `Here's everything you need to know about ${topic} 🧵👇\n\n[Swipe through for the full breakdown →]\n\nWe compiled the facts so you don't have to. Save this post for later!\n\n📌 Save · 💬 Comment · 📤 Share\n\n#MSUTexas #TheWichitan #InfoThread #KnowledgeIsPower`,
+            behindscenes: `Ever wonder what goes into covering ${topic}? 👀\n\nHere's a peek behind the curtain at The Wichitan newsroom. It takes a team of passionate student journalists to bring you the stories that matter.\n\nWant to join us? DM us! 🐝\n\n#MSUTexas #TheWichitan #BehindTheScenes #StudentJournalism`
+          };
+
+          const viralScores = { news: 88, opinion: 92, spotlight: 78, event: 85, carousel: 90, behindscenes: 74 };
+          const suggestedTimes = { news: "ASAP — breaking content", opinion: "Wednesday 1:00 PM", spotlight: "Thursday 1:00 PM", event: "Tuesday 1:00 PM", carousel: "Wednesday 1:00 PM", behindscenes: "Friday 12:00 PM" };
+
+          setGenerated({
+            caption: captions[contentType],
+            viralScore: viralScores[contentType] + Math.floor(Math.random() * 8 - 4),
+            suggestedTime: suggestedTimes[contentType],
+            contentFormula: contentTypes.find(c => c.id === contentType)?.label,
+            imagePrompt: `Modern, eye-catching social media graphic for ${topic}, featuring navy blue and white color scheme with accent blue highlights, professional editorial style for a university newspaper, The Wichitan MSU Texas branding`,
+            hashtags: ["#MSUTexas", "#TheWichitan", "#CampusLife", "#WichitaFalls"],
+            aiNotes: `This ${contentType} post is optimized for ${selectedPlatforms.map(p => PLATFORM_ICONS[p]?.name).join(', ')}. ${contentType === 'carousel' ? 'Carousel format on Instagram will drive saves and extended reach.' : ''} ${contentType === 'opinion' ? 'Opinion content drives highest comment engagement — the question CTA will boost algorithm ranking.' : ''} Post during suggested time for 23% higher completion rate.`
+          });
+          setGenerating(false);
+        }, 2000);
+      };
+
+      const saveToDrafts = () => {
+        if (!generated) return;
+        const newDraft = {
+          id: 'd' + Date.now(),
+          title: topic,
+          type: contentType,
+          status: 'draft',
+          platforms: selectedPlatforms,
+          caption: generated.caption,
+          imagePrompt: generated.imagePrompt,
+          scheduledTime: null,
+          createdAt: new Date().toISOString(),
+          contentFormula: generated.contentFormula,
+          viralScore: generated.viralScore,
+          suggestedTime: generated.suggestedTime,
+          aiNotes: generated.aiNotes
+        };
+        setDrafts(prev => [newDraft, ...prev]);
+        setGenerated(null);
+        setTopic("");
+      };
+
+      return (
+        <div className="fade-in space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-navy-800 flex items-center gap-2">
+              <Icon name="sparkle" size={24} className="text-bee-500" /> AI Content Creator
+            </h2>
+            <p className="text-slate-500 mt-1">Generate viral-optimized posts powered by competitor research and engagement data.</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* INPUT PANEL */}
+            <div className="space-y-5">
+              <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-5">
+                <div>
+                  <label className="block text-sm font-semibold text-navy-800 mb-2">What's the story?</label>
+                  <textarea value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. MSU announces new dining hall renovations starting Fall 2026..."
+                    className="w-full p-4 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-500 focus:border-accent-500 outline-none resize-none transition-all" rows={3} />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-navy-800 mb-2">Content Type</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {contentTypes.map(ct => (
+                      <button key={ct.id} onClick={() => setContentType(ct.id)}
+                        className={`flex items-center gap-2 p-3 rounded-xl border text-sm font-medium transition-all ${
+                          contentType === ct.id ? 'border-accent-500 bg-accent-50 text-accent-700' : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}>
+                        <Icon name={ct.icon} size={16} /> {ct.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-navy-800 mb-2">Platforms</label>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(PLATFORM_ICONS).map(([key, val]) => (
+                      <button key={key} onClick={() => togglePlatform(key)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
+                          selectedPlatforms.includes(key) ? 'text-white shadow-md' : 'border-slate-200 text-slate-600 hover:border-slate-300 bg-white'
+                        }`}
+                        style={selectedPlatforms.includes(key) ? { background: val.color, borderColor: val.color } : {}}>
+                        {val.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-navy-800 mb-2">Tone</label>
+                  <div className="flex flex-wrap gap-2">
+                    {tones.map(t => (
+                      <button key={t} onClick={() => setTone(t)}
+                        className={`px-4 py-2 rounded-xl border text-sm font-medium capitalize transition-all ${
+                          tone === t ? 'border-accent-500 bg-accent-50 text-accent-700' : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}>{t}</button>
+                    ))}
+                  </div>
+                </div>
+
+                <button onClick={generateContent} disabled={!topic.trim() || generating}
+                  className="w-full gradient-navy text-white py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg">
+                  {generating ? (
+                    <><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full spin-slow" /> Generating...</>
+                  ) : (
+                    <><Icon name="sparkle" size={18} /> Generate Viral Content</>
+                  )}
+                </button>
+              </div>
+
+              {/* VIRAL TIPS */}
+              <div className="bg-gradient-to-br from-accent-50 to-blue-50 rounded-2xl p-5 border border-accent-100">
+                <h4 className="font-semibold text-navy-800 flex items-center gap-2 mb-3"><Icon name="zap" size={16} className="text-bee-500" /> Viral Tips</h4>
+                <ul className="space-y-2 text-sm text-slate-600">
+                  <li className="flex items-start gap-2"><span className="text-accent-500 mt-0.5">•</span> Carousel posts get <strong>10% avg engagement</strong> — highest of any Instagram format</li>
+                  <li className="flex items-start gap-2"><span className="text-accent-500 mt-0.5">•</span> Opinion pieces with question CTAs drive <strong>3x more comments</strong></li>
+                  <li className="flex items-start gap-2"><span className="text-accent-500 mt-0.5">•</span> Post at <strong>1 PM Tue-Thu</strong> for maximum college audience reach</li>
+                  <li className="flex items-start gap-2"><span className="text-accent-500 mt-0.5">•</span> TikTok hook must grab attention in <strong>first 2-3 seconds</strong></li>
+                </ul>
+              </div>
+            </div>
+
+            {/* OUTPUT PANEL */}
+            <div>
+              {generating && (
+                <div className="bg-white rounded-2xl p-12 border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 rounded-full gradient-navy flex items-center justify-center mb-4 pulse-glow">
+                    <span className="text-white spin-slow inline-block"><Icon name="sparkle" size={28} /></span>
+                  </div>
+                  <h3 className="font-semibold text-navy-800 text-lg">Generating your content...</h3>
+                  <p className="text-slate-500 text-sm mt-2">Analyzing viral patterns, optimizing for engagement, crafting your caption...</p>
+                </div>
+              )}
+
+              {!generating && !generated && (
+                <div className="bg-white rounded-2xl p-12 border border-slate-100 shadow-sm border-dashed flex flex-col items-center justify-center text-center min-h-[400px]">
+                  <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                    <Icon name="sparkle" size={28} className="text-slate-400" />
+                  </div>
+                  <h3 className="font-semibold text-slate-600 text-lg">Ready to create</h3>
+                  <p className="text-slate-400 text-sm mt-2 max-w-xs">Fill in the details and hit generate. Our AI will create viral-optimized content based on competitor research.</p>
+                </div>
+              )}
+
+              {!generating && generated && (
+                <div className="space-y-4 fade-in">
+                  <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-navy-800">Generated Content</h3>
+                      <ViralScore score={generated.viralScore} />
+                    </div>
+
+                    <div className="bg-slate-50 rounded-xl p-4">
+                      <pre className="whitespace-pre-wrap text-sm text-slate-700 font-sans leading-relaxed">{generated.caption}</pre>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-accent-50 rounded-xl p-3">
+                        <p className="text-xs text-accent-600 font-semibold mb-1">Suggested Post Time</p>
+                        <p className="text-sm font-bold text-navy-800 flex items-center gap-1"><Icon name="clock" size={14} /> {generated.suggestedTime}</p>
+                      </div>
+                      <div className="bg-emerald-50 rounded-xl p-3">
+                        <p className="text-xs text-emerald-600 font-semibold mb-1">Content Formula</p>
+                        <p className="text-sm font-bold text-navy-800">{generated.contentFormula}</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 rounded-xl p-4">
+                      <p className="text-xs text-accent-600 font-semibold mb-2 flex items-center gap-1"><Icon name="info" size={12} /> AI Analysis</p>
+                      <p className="text-sm text-slate-600">{generated.aiNotes}</p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {selectedPlatforms.map(p => <PlatformBadge key={p} platform={p} />)}
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <button onClick={saveToDrafts} className="flex-1 gradient-navy text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg">
+                        <Icon name="file" size{16} /> Save to Drafts
+                      </button>
+                      <button onClick={generateContent} className="px-4 py-3 rounded-xl border-2 border-accent-200 text-accent-700 font-semibold hover:bg-accent-50 transition-all flex items-center gap-2">
+                        <Icon name="refresh" size={16} /> Regenerate
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ============================================
+    // DRAFTS PAGE
+    // ============================================
+    const DraftsPage = () => {
+      const { drafts, setDrafts, setCurrentPage } = useContext(AppContext);
+      const [filter, setFilter] = useState("all");
+      const [editingId, setEditingId] = useState(null);
+      const [editPrompt, setEditPrompt] = useState("");
+      const [aiEditing, setAiEditing] = useState(false);
+
+      const filtered = filter === "all" ? drafts : drafts.filter(d => d.status === filter);
+
+      const approveDraft = (id) => {
+        setDrafts(prev => prev.map(d => d.id === id ? { ...d, status: 'approved', scheduledTime: new Date(Date.now() + 86400000).toISOString() } : d));
+      };
+
+      const rejectDraft = (id) => {
+        setDrafts(prev => prev.filter(d => d.id !== id));
+      };
+
+      const aiEditDraft = (id) => {
+        if (!editPrompt.trim()) return;
+        setAiEditing(true);
+        setTimeout(() => {
+          setDrafts(prev => prev.map(d => {
+            if (d.id !== id) return d;
+            let newCaption = d.caption;
+            if (editPrompt.toLowerCase().includes("shorter")) {
+              newCaption = d.caption.split('\n').slice(0, 3).join('\n') + "\n\n#MSUTexas #TheWichitan";
+            } else if (editPrompt.toLowerCase().includes("emoji")) {
+              newCaption = d.caption.replace(/\./g, '. ✨').replace(/!/, '! 🔥');
+            } else if (editPrompt.toLowerCase().includes("formal")) {
+              newCaption = d.caption.replace(/🚨|🔥|👇|📅|🎉|💬|💤|📌|🤏|👀|🐝|🌟|🎨/g, '').trim();
+            } else {
+              newCaption = `[Updated based on: "${editPrompt}"]\n\n` + d.caption;
+            }
+            return { ...d, caption: newCaption, viralScore: Math.min(99, d.viralScore + Math.floor(Math.random() * 5)) };
+          }));
+          setAiEditing(false);
+          setEditingId(null);
+          setEditPrompt("");
+        }, 1500);
+      };
+
+      return (
+        <div className="fade-in space-y-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-navy-800 flex items-center gap-2">
+                <Icon name="file" size={24} className="text-accent-500" /> Draft Management
+              </h2>
+              <p className="text-slate-500 mt-1">Review, edit, and approve posts before they go live.</p>
+            </div>
+            <div className="flex gap-2">
+              {[{id:"all",label:"All"},{id:"draft",label:"Pending"},{id:"approved",label:"Approved"}].map(f => (
+                <button key={f.id} onClick={() => setFilter(f.id)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    filter === f.id ? 'gradient-navy text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'
+                  }`}>{f.label} ({f.id === 'all' ? drafts.length : drafts.filter(d => d.status === f.id).length})</button>
+              ))}
+            </div>
+          </div>
+
+          {filtered.length === 0 && (
+            <div className="bg-white rounded-2xl p-12 border border-slate-100 text-center">
+              <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                <Icon name="file" size={28} className="text-slate-400" />
+              </div>
+              <h3 className="font-semibold text-slate-600">No drafts yet</h3>
+              <p className="text-slate-400 text-sm mt-2">Create your first post with the AI Creator.</p>
+              <button onClick={() => setCurrentPage('create')} className="mt-4 gradient-navy text-white px-6 py-2.5 rounded-xl font-medium text-sm">Create Post</button>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {filtered.map(draft => (
+              <div key={draft.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-md transition-all">
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold text-navy-800 text-lg">{draft.title}</h3>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          draft.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                        }`}>{draft.status === 'approved' ? 'Approved' : 'Pending Review'}</span>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {draft.platforms.map(p => <PlatformBadge key={p} platform={p} small />)}
+                        <span className="text-xs text-slate-400">· {draft.contentFormula}</span>
+                        <span className="text-xs text-slate-400">· {new Date(draft.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <ViralScore score={draft.viralScore} />
+                  </div>
+
+                  <div className="bg-slate-50 rounded-xl p-4 mb-4">
+                    <pre className="whitespace-pre-wrap text-sm text-slate-700 font-sans leading-relaxed">{draft.caption}</pre>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                    <div className="bg-accent-50 rounded-lg p-3">
+                      <p className="text-xs text-accent-600 font-semibold">Best Time</p>
+                      <p className="text-sm font-bold text-navy-800 mt-0.5">{draft.suggestedTime}</p>
+                    </div>
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <p className="text-xs text-blue-600 font-semibold">Formula</p>
+                      <p className="text-sm font-bold text-navy-800 mt-0.5">{draft.contentFormula}</p>
+                    </div>
+                    <div className="bg-purple-50 rounded-lg p-3 col-span-2">
+                      <p className="text-xs text-purple-600 font-semibold">AI Notes</p>
+                      <p className="text-xs text-slate-600 mt-0.5">{draft.aiNotes}</p>
+                    </div>
+                  </div>
+
+                  {/* AI Edit Section */}
+                  {editingId === draft.id ? (
+                    <div className="bg-gradient-to-r from-accent-50 to-blue-50 rounded-xl p-4 mb-4 border border-accent-100 fade-in">
+                      <p className="text-sm font-semibold text-navy-800 mb-2 flex items-center gap-2"><Icon name="sparkle" size={14} className="text-bee-500" /> AI Edit — describe your changes</p>
+                      <div className="flex gap-2">
+                        <input value={editPrompt} onChange={e => setEditPrompt(e.target.value)} placeholder="e.g. Make it shorter, add more emojis, make it more formal..."
+                          className="flex-1 px-4 py-2.5 border border-accent-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-500 outline-none" onKeyDown={e => e.key === 'Enter' && aiEditDraft(draft.id)} />
+                        <button onClick={() => aiEditDraft(draft.id)} disabled={aiEditing}
+                          className="gradient-navy text-white px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 hover:opacity-90 disabled:opacity-50">
+                          {aiEditing ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin-slow" /> : <Icon name="send" size={14} />}
+                          Apply
+                        </button>
+                        <button onClick={() => { setEditingId(null); setEditPrompt(""); }} className="px-3 py-2.5 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50">
+                          <Icon name="x" size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {draft.status === 'draft' && (
+                      <>
+                        <button onClick={() => approveDraft(draft.id)} className="gradient-navy text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 hover:opacity-90 shadow-md">
+                          <Icon name="check" size={14} />> Approve & Schedule
+                        </button>
+                        <button onClick={() => rejectDraft(draft.id)} className="px-4 py-2.5 rounded-xl border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 flex items-center gap-2">
+                          <Icon name="x" size={14} /> Reject
+                        </button>
+                      </>
+                    )}
+                    <button onClick={() => setEditingId(editingId === draft.id ? null : draft.id)} className="px-4 py-2.5 rounded-xl border border-accent-200 text-accent-700 text-sm font-medium hover:bg-accent-50 flex items-center gap-2">
+                      <Icon name="edit" size={14} /> AI Edit
+                    </button>
+                    {draft.status === 'approved' && draft.scheduledTime && (
+                      <span className="ml-auto text-sm text-slate-500 flex items-center gap-1">
+                        <Icon name="clock" size={14} /> Scheduled: {new Date(draft.scheduledTime).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    // ============================================
+    // SCHEDULE PAGE
+    // ============================================
+    const SchedulePage = () => {
+      const { drafts } = useContext(AppContext);
+      const approved = drafts.filter(d => d.status === 'approved');
+      const today = new Date();
+      const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+      const calendarDays = useMemo(() => {
+        const start = new Date(today.getFullYear(), today.getMonth(), 1);
+        const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        const startDay = start.getDay();
+        const days = [];
+        for (let i = 0; i < startDay; i++) days.push(null);
+        for (let d = 1; d <= end.getDate(); d++) days.push(d);
+        return days;
+      }, []);
+
+      const getPostsForDay = (day) => {
+        if (!day) return [];
+        return approved.filter(d => {
+          if (!d.scheduledTime) return false;
+          const dt = new Date(d.scheduledTime);
+          return dt.getDate() === day && dt.getMonth() === today.getMonth();
+        });
+      };
+
+      return (
+        <div className="fade-in space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-navy-800 flex items-center gap-2">
+              <Icon name="calendar" size={24} className="text-accent-500" /> Content Schedule
+            </h2>
+            <p className="text-slate-500 mt-1">{today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} — {approved.length} posts scheduled</p>
+          </div>
+
+          {/* Optimal times banner */}
+          <div className="bg-gradient-to-r from-accent-50 to-blue-50 rounded-2xl p-5 border border-accent-100">
+            <h4 className="font-semibold text-navy-800 mb-3 flex items-center gap-2"><Icon name="clock" size={16} className="text-accent-500" /> Optimal Posting Times (Based on Research)</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {Object.entries(VIRAL_RESEARCH.optimalTimes).map(([platform, times]) => (
+                <div key={platform} className="bg-white rounded-xl p-3">
+                  <PlatformBadge platform={platform} />
+                  <div className="mt-2 space-y-1">
+                    {times.best.map((t, i) => (
+                      <p key={i} className="text-xs text-slate-600 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> {t}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Calendar */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="grid grid-cols-7">
+              {daysOfWeek.map(d => (
+                <div key={d} className="py-3 text-center text-xs font-semibold text-slate-500 border-b border-slate-100 bg-slate-50">{d}</div>
+              ))}
+              {calendarDays.map((day, i) => {
+                const posts = getPostsForDay(day);
+                const isToday = day === today.getDate();
+                return (
+                  <div key={i} className={`min-h-[100px] p-2 border-b border-r border-slate-100 ${!day ? 'bg-slate-50/50' : 'hover:bg-accent-50/30'} transition-colors`}>
+                    {day && (
+                      <>
+                        <span className={`text-sm font-medium ${isToday ? 'w-7 h-7 rounded-full gradient-navy text-white flex items-center justify-center' : 'text-slate-600'}`}>{day}</span>
+                        <div className="mt-1 space-y-1">
+                          {posts.map(p => (
+                            <div key={p.id} className="bg-accent-100 text-accent-800 text-xs p-1.5 rounded-lg truncate font-medium cursor-pointer hover:bg-accent-200 transition-colors" title={p.title}>
+                              {p.title}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Upcoming posts list */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+            <h3 className="font-semibold text-navy-800 mb-4">Upcoming Scheduled Posts</h3>
+            {approved.length === 0 ? (
+              <p className="text-slate-400 text-sm">No posts scheduled. Approve drafts to add them to the schedule.</p>
+            ) : (
+              <div className="space-y-3">
+                {approved.map(post => (
+                  <div key={post.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl gradient-navy flex items-center justify-center text-white">
+                        <Icon name="calendar" size={16} />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm text-navy-800">{post.title}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {post.platforms.map(p => <PlatformBadge key={p} platform={p} small />)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-navy-800">{post.scheduledTime ? new Date(post.scheduledTime).toLocaleDateString() : post.suggestedTime}</p>
+                      <p className="text-xs text-slate-500">{post.scheduledTime ? new Date(post.scheduledTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Suggested time'}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // ============================================
+    // ANALYTICS PAGE
+    // ============================================
+    const AnalyticsPage = () => {
+      return (
+        <div className="fade-in space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-navy-800 flex items-center gap-2">
+              <Icon name="chart" size={24} className="text-accent-500" /> Analytics Dashboard
+            </h2>
+            <p className="text-slate-500 mt-1">Track performance across all platforms and optimize your strategy.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard icon="eye" label="Total Reach" value={ANALYTICS_DATA.totalReach} growth={ANALYTICS_DATA.reachGrowth} />
+            <StatCard icon="heart" label="Engagements" value={ANALYTICS_DATA.totalEngagement} growth={ANALYTICS_DATA.engagementGrowth} />
+            <StatCard icon="users" label="Followers" value={ANALYTICS_DATA.totalFollowers} growth={ANALYTICS_DATA.followerGrowth} />
+            <StatCard icon="trending" label="Posts" value={ANALYTICS_DATA.totalPosts} growth={ANALYTICS_DATA.postGrowth} />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <h3 className="font-semibold text-navy-800 mb-4">Reach by Platform (This Week)</h3>
+              <MiniBarChart data={ANALYTICS_DATA.weeklyReach} dataKeys={["instagram","twitter","facebook","tiktok"]} colors={["#E1306C","#1DA1F2","#4267B2","#000"]} />
+              <div className="flex gap-4 mt-4 justify-center">
+                {[{label:"Instagram", color:"#E1306C"},{label:"X", color:"#1DA1F2"},{label:"Facebook", color:"#4267B2"},{label:"TikTok", color:"#000"}].map(p => (
+                  <span key={p.label} className="flex items-center gap-1.5 text-xs text-slate-600">
+                    <span className="w-3 h-3 rounded" style={{background: p.color}} /> {p.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <h3 className="font-semibold text-navy-800 mb-4">Engagement Benchmarks vs. Industry</h3>
+              <div className="space-y-4">
+                {Object.entries(VIRAL_RESEARCH.benchmarks).map(([platform, data]) => (
+                  <div key={platform}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <PlatformBadge platform={platform} small />
+                        <span className="text-sm text-slate-600">Avg: {data.avgEngagement}</span>
+                      </div>
+                      <span className="text-sm font-semibold text-emerald-600">Goal: {data.goal}</span>
+                    </div>
+                    <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full gradient-navy" style={{width: `${parseFloat(data.avgEngagement) * 20}%`}} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+            <h3 className="font-semibold text-navy-800 mb-4">Platform Breakdown</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {ANALYTICS_DATA.platformBreakdown.map(p => (
+                <div key={p.platform} className="rounded-xl border border-slate-100 p-4 hover:shadow-md transition-all">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold" style={{background: PLATFORM_ICONS[p.platform]?.color}}>
+                      {PLATFORM_ICONS[p.platform]?.abbr}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-navy-800">{PLATFORM_ICONS[p.platform]?.name}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Followers</span><span className="font-semibold text-navy-800">{p.followers.toLocaleString()}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Engagement</span><span className="font-semibold text-emerald-600">{p.engagement}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">Posts</span><span className="font-semibold text-navy-800">{p.posts}</span></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ============================================
+    // VIRAL INSIGHTS PAGE
+    // ============================================
+    const InsightsPage = () => {
+      const [activeTab, setActiveTab] = useState("formulas");
+
+      return (
+        <div className="fade-in space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-navy-800 flex items-center gap-2">
+              <Icon name="brain" size={24} className="text-accent-500" /> Viral Insights Engine
+            </h2>
+            <p className="text-slate-500 mt-1">Research-backed strategies from Harvard Crimson, Daily Princetonian, NYT, Washington Post, and more.</p>
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            {[{id:"formulas",label:"Content Formulas"},{id:"captions",label:"Caption Templates"},{id:"ctas",label:"CTAs"},{id:"timing",label:"Optimal Timing"},{id:"competitors",label:"Competitor Insights"}].map(tab => (
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  activeTab === tab.id ? 'gradient-navy text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'
+                }`}>{tab.label}</button>
+            ))}
+          </div>
+
+          {activeTab === "formulas" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 fade-in">
+              {VIRAL_RESEARCH.contentFormulas.map((f, i) => (
+                <div key={i} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-navy-800">{f.name}</h4>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${f.engagement === 'Very High' ? 'bg-emerald-100 text-emerald-700' : f.engagement === 'High' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {f.engagement}
+                    </span>
+                  </div>
+                  <div className="bg-slate-50 rounded-xl p-3 mb-3">
+                    <p className="text-sm text-slate-700 font-mono">{f.formula}</p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {f.platforms.map(p => <PlatformBadge key={p} platform={p} small />)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === "captions" && (
+            <div className="space-y-4 fade-in">
+              {Object.entries(VIRAL_RESEARCH.captionTemplates).map(([key, tmpl]) => (
+                <div key={key} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                  <h4 className="font-semibold text-navy-800 capitalize mb-3">{key.replace(/_/g, ' ')} Template</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs font-semibold text-accent-600 mb-1.5">Template</p>
+                      <div className="bg-accent-50 rounded-xl p-3"><p className="text-sm text-slate-700 font-mono">{tmpl.template}</p></div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-emerald-600 mb-1.5">Example</p>
+                      <div className="bg-emerald-50 rounded-xl p-3"><p className="text-sm text-slate-700">{tmpl.example}</p></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === "ctas" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 fade-in">
+              {Object.entries(VIRAL_RESEARCH.ctas).map(([category, ctas]) => (
+                <div key={category} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                  <h4 className="font-semibold text-navy-800 capitalize mb-3">{category.replace(/_/g, ' ')} CTAs</h4>
+                  <div className="space-y-2">
+                    {ctas.map((cta, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 hover:bg-accent-50 transition-colors cursor-pointer group">
+                        <Icon name="copy" size={14} className="text-slate-400 group-hover:text-accent-500" />
+                        <span className="text-sm text-slate-700">{cta}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === "timing" && (
+            <div className="fade-in space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(VIRAL_RESEARCH.optimalTimes).map(([platform, times]) => (
+                  <div key={platform} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold" style={{background: PLATFORM_ICONS[platform]?.color}}>
+                        {PLATFORM_ICONS[platform]?.abbr}
+                      </div>
+                      <h4 className="font-semibold text-navy-800">{PLATFORM_ICONS[platform]?.name}</h4>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-emerald-600">Best Times</p>
+                      {times.best.map((t, i) => (
+                        <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-emerald-50">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span className="text-sm text-slate-700">{t}</span>
+                        </div>
+                      ))}
+                      <p className="text-xs font-semibold text-red-500 mt-3">Avoid</p>
+                      {times.worst.map((t, i) => (
+                        <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-red-50">
+                          <span className="w-2 h-2 rounded-full bg-red-400" />
+                          <span className="text-sm text-slate-700">{t}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "competitors" && (
+            <div className="fade-in space-y-4">
+              {[
+                { name: "Harvard Crimson", handle: "@thecrimson", insight: "Student-produced authentic content vastly outperforms polished corporate content. Their student influencers (500K+ followers) generate more engagement than official accounts.", strategy: "Peer-to-peer authenticity, campus lifestyle, breaking news speed", weakness: "Official accounts lack viral components — too corporate" },
+                { name: "Daily Princetonian", handle: "@dailyprincetonian", insight: "15K Instagram followers, 16K Twitter. Focus on campus dialogue-driving content. Opinion pieces and policy coverage perform best.", strategy: "Campus-relevant dialogue, student opinions, policy impact stories", weakness: "Limited TikTok presence — emerging platform gap" },
+                { name: "Washington Post", handle: "@washingtonpost", insight: "Known for viral TikTok presence. Reporter personality-driven content, trending sound usage, quick-turn news stories.", strategy: "Edutainment format, reporter personalities, platform-native content", weakness: "Large team — strategy is resource-intensive" },
+                { name: "New York Times", handle: "@nytimes", insight: "Uses CrowdTangle for organic moment detection. Strategic re-sharing during peak activity. Capitalizes on unplanned virality.", strategy: "Visual storytelling, dedicated section accounts, analytics-driven posting", weakness: "High production value — not easily replicable" }
+              ].map((comp, i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-navy-800 text-lg">{comp.name}</h4>
+                      <span className="text-sm text-accent-600">{comp.handle}</span>
+                    </div>
+                    <span className="px-3 py-1 rounded-full bg-slate-100 text-xs font-medium text-slate-600">Competitor</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="bg-accent-50 rounded-xl p-3">
+                      <p className="text-xs font-semibold text-accent-600 mb-1">Key Insight</p>
+                      <p className="text-sm text-slate-700">{comp.insight}</p>
+                    </div>
+                    <div className="bg-emerald-50 rounded-xl p-3">
+                      <p className="text-xs font-semibold text-emerald-600 mb-1">Strategy</p>
+                      <p className="text-sm text-slate-700">{comp.strategy}</p>
+                    </div>
+                    <div className="bg-amber-50 rounded-xl p-3">
+                      <p className="text-xs font-semibold text-amber-600 mb-1">Opportunity for Us</p>
+                      <p className="text-sm text-slate-700">{comp.weakness}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <div className="bg-gradient-to-r from-navy-500 to-accent-600 rounded-2xl p-6 text-white">
+                <h4 className="font-bold text-lg mb-3">The Wichitan's Competitive Advantage</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white/10 rounded-xl p-4">
+                    <p className="font-semibold mb-1">Authenticity First</p>
+                    <p className="text-sm text-blue-100">Rough, real student content outperforms polished corporate content by a wide margin with college audiences.</p>
+                  </div>
+                  <div className="bg-white/10 rounded-xl p-4">
+                    <p className="font-semibold mb-1">TikTok Gap</p>
+                    <p className="text-sm text-blue-100">Most college newspapers have weak TikTok presence. Early movers get 7x higher engagement than Instagram.</p>
+                  </div>
+                  <div className="bg-white/10 rounded-xl p-4">
+                    <p className="font-semibold mb-1">Local Authority</p>
+                    <p className="text-sm text-blue-100">No competitor covers MSU Texas and Wichita Falls. Own the local news niche completely.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================
+    // CONNECT PAGE
+    // ============================================
+    const ConnectPage = () => {
+      const [connections, setConnections] = useState({
+        instagram: { connected: false, handle: "" },
+        twitter: { connected: false, handle: "" },
+        facebook: { connected: false, handle: "" },
+        tiktok: { connected: false, handle: "" }
+      });
+
+      const toggleConnect = (platform) => {
+        setConnections(prev => ({
+          ...prev,
+          [platform]: {
+            connected: !prev[platform].connected,
+            handle: !prev[platform].connected ? `@thewichitan` : ""
+          }
+        }));
+      };
+
+      const platformDetails = {
+        instagram: { desc: "Share photos, carousels, Reels, and Stories. Best for visual storytelling and community engagement.", features: ["Auto-post photos & carousels", "Schedule Reels", "Story scheduling", "Hashtag optimization"] },
+        twitter: { desc: "Real-time news breaking, threads, and quick updates. Primary platform for breaking campus news.", features: ["Auto-post tweets", "Thread scheduling", "Trend monitoring", "Quote tweet management"] },
+        facebook: { desc: "Reach broader community including alumni, parents, and Wichita Falls locals.", features: ["Page auto-posting", "Event creation", "Community engagement", "Audience insights"] },
+        tiktok: { desc: "Short-form video with highest engagement rates. Best for reaching student audiences.", features: ["Video scheduling", "Trending sound alerts", "Hashtag suggestions", "Performance tracking"] }
+      };
+
+      return (
+        <div className="fade-in space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-navy-800 flex items-center gap-2">
+              <Icon name="link" size={24} className="text-accent-500" /> Connect Platforms
+            </h2>
+            <p className="text-slate-500 mt-1">Link your social media accounts for parallel posting and scheduling.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Object.entries(platformDetails).map(([platform, details]) => (
+              <div key={platform} className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all hover:shadow-md ${connections[platform].connected ? 'border-emerald-200' : 'border-slate-100'}`}>
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold" style={{background: PLATFORM_ICONS[platform]?.color}}>
+                        {PLATFORM_ICONS[platform]?.abbr}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-navy-800">{PLATFORM_ICONS[platform]?.name}</h3>
+                        {connections[platform].connected && <p className="text-xs text-emerald-600 font-medium">{connections[platform].handle} · Connected</p>}
+                      </div>
+                    </div>
+                    <button onClick={() => toggleConnect(platform)}
+                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                        connections[platform].connected ? 'bg-emerald-100 text-emerald-700 hover:bg-red-100 hover:text-red-700' : 'gradient-navy text-white hover:opacity-90 shadow-md'
+                      }`}>
+                      {connections[platform].connected ? 'Disconnect' : 'Connect'}
+                    </button>
+                  </div>
+                  <p className="text-sm text-slate-600 mb-4">{details.desc}</p>
+                  <div className="space-y-1.5">
+                    {details.features.map((f, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm text-slate-600">
+                        <Icon name="check" size={14} className={connections[platform].connected ? 'text-emerald-500' : 'text-slate-300'} />
+                        <span>{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {connections[platform].connected && (
+                  <div className="bg-emerald-50 px-6 py-3 border-t border-emerald-100">
+                    <p className="text-xs text-emerald-700 font-medium flex items-center gap-1"><Icon name="check" size={12} /> Ready for parallel posting</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-gradient-to-r from-accent-50 to-blue-50 rounded-2xl p-6 border border-accent-100">
+            <h4 className="font-semibold text-navy-800 mb-2">How Parallel Posting Works</h4>
+            <p className="text-sm text-slate-600 mb-4">When you approve a draft, SocialBee automatically adapts and schedules it for each connected platform at the optimal time. Captions, hashtags, and formats are adjusted per platform.</p>
+            <div className="flex items-center gap-3 text-sm">
+              <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg"><Icon name="sparkle" size={14} className="text-bee-500" /> AI generates</div>
+              <Icon name="arrowRight" size={14} className="text-slate-400" />
+              <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg"><Icon name="check" size={14} className="text-emerald-500" /> You approve</div>
+              <Icon name="arrowRight" size={14} className="text-slate-400" />
+              <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg"><Icon name="send" size={14} className="text-accent-500" /> Auto-posts everywhere</div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ============================================
+    // APP
+    // ============================================
+    const App = () => {
+      const [currentPage, setCurrentPage] = useState("dashboard");
+      const [sidebarOpen, setSidebarOpen] = useState(true);
+      const [drafts, setDrafts] = useState(INITIAL_DRAFTS);
+
+      const contextValue = useMemo(() => ({
+        currentPage, setCurrentPage, drafts, setDrafts
+      }), [currentPage, drafts]);
+
+      const pages = {
+        dashboard: DashboardPage,
+        create: CreatePage,
+        drafts: DraftsPage,
+        schedule: SchedulePage,
+        analytics: AnalyticsPage,
+        insights: InsightsPage,
+        connect: ConnectPage
+      };
+
+      const PageComponent = pages[currentPage] || DashboardPage;
+
+      return (
+        <AppContext.Provider value={contextValue}>
+          <div className="min-h-screen bg-slate-50">
+            <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
+            {/* Top Bar */}
+            <div className={`fixed top-0 right-0 z-40 h-16 glass border-b border-slate-200/50 flex items-center justify-between px-6 transition-all duration-300 ${sidebarOpen ? 'left-64' : 'left-20'}`}>
+              <div className="flex items-center gap-3">
+                <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden p-2 rounded-lg hover:bg-slate-100">
+                  <Icon name="menu" size={20} className="text-slate-600" />
+                </button>
+                <div>
+                  <h1 className="font-bold text-navy-800 text-sm">The Wichitan</h1>
+                  <p className="text-xs text-slate-400">MSU Texas Student Newspaper</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <button onClick={() => setCurrentPage('create')} className="gradient-navy text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 hover:opacity-90 shadow-md">
+                  <Icon name="plus" size={14} /> New Post
+                </button>
+                <div className="w-9 h-9 rounded-full gradient-navy flex items-center justify-center text-white text-sm font-bold">S</div>
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'} pt-24 pb-8 px-6 lg:px-8`}>
+              <div className="max-w-7xl mx-auto">
+                <PageComponent />
+              </div>
+            </main>
+          </div>
+        </AppContext.Provider>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
