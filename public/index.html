@@ -1183,91 +1183,169 @@ h<!DOCTYPE html>
     };
 
     // ============================================
-    // CONNECT PAGE
+    // CONNECT PAGE (Real OAuth Integration)
     // ============================================
     const ConnectPage = () => {
       const [connections, setConnections] = useState({
-        instagram: { connected: false, handle: "" },
-        twitter: { connected: false, handle: "" },
-        facebook: { connected: false, handle: "" },
-        tiktok: { connected: false, handle: "" }
+        instagram: { connected: false, name: "" },
+        twitter: { connected: false, name: "" },
+        facebook: { connected: false, name: "" },
+        tiktok: { connected: false, name: "" }
       });
+      const [configured, setConfigured] = useState({});
+      const [loading, setLoading] = useState(true);
+      const [actionLoading, setActionLoading] = useState(null);
+      const [toast, setToast] = useState(null);
 
-      const toggleConnect = (platform) => {
-        setConnections(prev => ({
-          ...prev,
-          [platform]: {
-            connected: !prev[platform].connected,
-            handle: !prev[platform].connected ? `@thewichitan` : ""
-          }
-        }));
+      useEffect(() => {
+        const checkStatus = async () => {
+          try {
+            const res = await fetch('/api/status');
+            const data = await res.json();
+            const newConns = {};
+            for (const [platform, info] of Object.entries(data.status)) {
+              newConns[platform] = { connected: info.connected, name: info.name || '' };
+            }
+            setConnections(newConns);
+            setConfigured(data.configured || {});
+          } catch (err) { console.error('Failed to check status:', err); }
+          finally { setLoading(false); }
+        };
+        const hash = window.location.hash;
+        const params = new URLSearchParams(hash.includes('?') ? hash.split('?')[1] : '');
+        if (params.get('success')) {
+          const p = params.get('success');
+          setToast({ type: 'success', message: p.charAt(0).toUpperCase() + p.slice(1) + ' connected as ' + (params.get('name') || 'Connected') + '!' });
+          window.location.hash = '#/connect';
+        } else if (params.get('error')) {
+          setToast({ type: 'error', message: 'Connection failed: ' + params.get('error').replace(/_/g, ' ') });
+          window.location.hash = '#/connect';
+        }
+        checkStatus();
+      }, []);
+
+      useEffect(() => {
+        if (toast) { const t = setTimeout(() => setToast(null), 5000); return () => clearTimeout(t); }
+      }, [toast]);
+
+      const handleConnect = (platform) => {
+        if (!configured[platform]) { setToast({ type: 'error', message: platform + ' API keys not configured. Add them in Vercel Environment Variables.' }); return; }
+        setActionLoading(platform);
+        window.location.href = '/api/auth/' + platform;
+      };
+
+      const handleDisconnect = async (platform) => {
+        setActionLoading(platform);
+        try { await fetch('/api/disconnect?platform=' + platform); setConnections(prev => ({...prev, [platform]: { connected: false, name: '' }})); setToast({ type: 'success', message: platform.charAt(0).toUpperCase() + platform.slice(1) + ' disconnected.' }); }
+        catch { setToast({ type: 'error', message: 'Failed to disconnect.' }); }
+        finally { setActionLoading(null); }
       };
 
       const platformDetails = {
-        instagram: { desc: "Share photos, carousels, Reels, and Stories. Best for visual storytelling and community engagement.", features: ["Auto-post photos & carousels", "Schedule Reels", "Story scheduling", "Hashtag optimization"] },
-        twitter: { desc: "Real-time news breaking, threads, and quick updates. Primary platform for breaking campus news.", features: ["Auto-post tweets", "Thread scheduling", "Trend monitoring", "Quote tweet management"] },
-        facebook: { desc: "Reach broader community including alumni, parents, and Wichita Falls locals.", features: ["Page auto-posting", "Event creation", "Community engagement", "Audience insights"] },
-        tiktok: { desc: "Short-form video with highest engagement rates. Best for reaching student audiences.", features: ["Video scheduling", "Trending sound alerts", "Hashtag suggestions", "Performance tracking"] }
+        instagram: { desc: "Share photos, carousels, Reels, and Stories. Best for visual storytelling and community engagement.", features: ["Auto-post photos & carousels", "Schedule Reels", "Story scheduling", "Hashtag optimization"], envKeys: "INSTAGRAM_CLIENT_ID, INSTAGRAM_CLIENT_SECRET" },
+        twitter: { desc: "Real-time news breaking, threads, and quick updates. Primary platform for breaking campus news.", features: ["Auto-post tweets", "Thread scheduling", "Trend monitoring", "Quote tweet management"], envKeys: "TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET" },
+        facebook: { desc: "Reach broader community including alumni, parents, and Wichita Falls locals.", features: ["Page auto-posting", "Event creation", "Community engagement", "Audience insights"], envKeys: "FACEBOOK_APP_ID, FACEBOOK_APP_SECRET" },
+        tiktok: { desc: "Short-form video with highest engagement rates. Best for reaching student audiences.", features: ["Video scheduling", "Trending sound alerts", "Hashtag suggestions", "Performance tracking"], envKeys: "TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET" }
       };
 
       return (
         <div className="fade-in space-y-6">
+          {toast && (
+            <div className={"fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2 " + (toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white')}>
+              <Icon name={toast.type === 'success' ? 'check' : 'x'} size={16} />
+              {toast.message}
+              <button onClick={() => setToast(null)} className="ml-2 opacity-70 hover:opacity-100"><Icon name="x" size={14} /></button>
+            </div>
+          )}
           <div>
             <h2 className="text-2xl font-bold text-navy-800 flex items-center gap-2">
               <Icon name="link" size={24} className="text-accent-500" /> Connect Platforms
             </h2>
             <p className="text-slate-500 mt-1">Link your social media accounts for parallel posting and scheduling.</p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.entries(platformDetails).map(([platform, details]) => (
-              <div key={platform} className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all hover:shadow-md ${connections[platform].connected ? 'border-emerald-200' : 'border-slate-100'}`}>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold" style={{background: PLATFORM_ICONS[platform]?.color}}>
-                        {PLATFORM_ICONS[platform]?.abbr}
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-8 h-8 border-3 border-accent-200 border-t-accent-600 rounded-full spin-slow"></div>
+              <span className="ml-3 text-slate-500">Checking connections...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(platformDetails).map(([platform, details]) => {
+                const isConnected = connections[platform]?.connected;
+                const isConfigured = configured[platform];
+                const isLoading = actionLoading === platform;
+                return (
+                  <div key={platform} className={"bg-white rounded-2xl border shadow-sm overflow-hidden transition-all hover:shadow-md " + (isConnected ? 'border-emerald-200' : !isConfigured ? 'border-amber-200' : 'border-slate-100')}>
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold" style={{background: PLATFORM_ICONS[platform]?.color}}>
+                            {PLATFORM_ICONS[platform]?.abbr}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-navy-800">{PLATFORM_ICONS[platform]?.name}</h3>
+                            {isConnected && <p className="text-xs text-emerald-600 font-medium">{connections[platform].name} · Connected</p>}
+                            {!isConfigured && !isConnected && <p className="text-xs text-amber-600 font-medium">API keys not configured</p>}
+                          </div>
+                        </div>
+                        {isConnected ? (
+                          <button onClick={() => handleDisconnect(platform)} disabled={isLoading} className="px-4 py-2 rounded-xl text-sm font-medium transition-all bg-emerald-100 text-emerald-700 hover:bg-red-100 hover:text-red-700 disabled:opacity-50">
+                            {isLoading ? 'Disconnecting...' : 'Disconnect'}
+                          </button>
+                        ) : (
+                          <button onClick={() => handleConnect(platform)} disabled={isLoading} className={"px-4 py-2 rounded-xl text-sm font-medium transition-all " + (isConfigured ? 'gradient-navy text-white hover:opacity-90 shadow-md' : 'bg-slate-100 text-slate-400 cursor-not-allowed')}>
+                            {isLoading ? 'Connecting...' : 'Connect'}
+                          </button>
+                        )}
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-navy-800">{PLATFORM_ICONS[platform]?.name}</h3>
-                        {connections[platform].connected && <p className="text-xs text-emerald-600 font-medium">{connections[platform].handle} · Connected</p>}
+                      <p className="text-sm text-slate-600 mb-4">{details.desc}</p>
+                      {!isConfigured && !isConnected && (
+                        <div className="mb-3 px-3 py-2 bg-amber-50 rounded-lg border border-amber-100">
+                          <p className="text-xs text-amber-700">Add env vars in Vercel: <span className="font-mono font-medium">{details.envKeys}</span></p>
+                        </div>
+                      )}
+                      <div className="space-y-1.5">
+                        {details.features.map((f, i) => (
+                          <div key={i} className="flex items-center gap-2 text-sm text-slate-600">
+                            <Icon name="check" size={14} className={isConnected ? 'text-emerald-500' : 'text-slate-300'} />
+                            <span>{f}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                    <button onClick={() => toggleConnect(platform)}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                        connections[platform].connected ? 'bg-emerald-100 text-emerald-700 hover:bg-red-100 hover:text-red-700' : 'gradient-navy text-white hover:opacity-90 shadow-md'
-                      }`}>
-                      {connections[platform].connected ? 'Disconnect' : 'Connect'}
-                    </button>
-                  </div>
-                  <p className="text-sm text-slate-600 mb-4">{details.desc}</p>
-                  <div className="space-y-1.5">
-                    {details.features.map((f, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm text-slate-600">
-                        <Icon name="check" size={14} className={connections[platform].connected ? 'text-emerald-500' : 'text-slate-300'} />
-                        <span>{f}</span>
+                    {isConnected && (
+                      <div className="bg-emerald-50 px-6 py-3 border-t border-emerald-100">
+                        <p className="text-xs text-emerald-700 font-medium flex items-center gap-1"><Icon name="check" size={12} /> Ready for parallel posting</p>
                       </div>
-                    ))}
+                    )}
                   </div>
-                </div>
-                {connections[platform].connected && (
-                  <div className="bg-emerald-50 px-6 py-3 border-t border-emerald-100">
-                    <p className="text-xs text-emerald-700 font-medium flex items-center gap-1"><Icon name="check" size={12} /> Ready for parallel posting</p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
+                );
+              })}
+            </div>
+          )}
           <div className="bg-gradient-to-r from-accent-50 to-blue-50 rounded-2xl p-6 border border-accent-100">
             <h4 className="font-semibold text-navy-800 mb-2">How Parallel Posting Works</h4>
-            <p className="text-sm text-slate-600 mb-4">When you approve a draft, SocialBee automatically adapts and schedules it for each connected platform at the optimal time. Captions, hashtags, and formats are adjusted per platform.</p>
+            <p className="text-sm text-slate-600 mb-4">When you approve a draft, SocialBee automatically adapts and schedules it for each connected platform at the optimal time.</p>
             <div className="flex items-center gap-3 text-sm">
               <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg"><Icon name="sparkle" size={14} className="text-bee-500" /> AI generates</div>
               <Icon name="arrowRight" size={14} className="text-slate-400" />
               <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg"><Icon name="check" size={14} className="text-emerald-500" /> You approve</div>
               <Icon name="arrowRight" size={14} className="text-slate-400" />
               <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg"><Icon name="send" size={14} className="text-accent-500" /> Auto-posts everywhere</div>
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
+            <h4 className="font-semibold text-navy-800 mb-3 flex items-center gap-2"><Icon name="sparkle" size={16} className="text-bee-500" /> Setup Guide</h4>
+            <p className="text-sm text-slate-600 mb-4">To connect real accounts, register developer apps on each platform and add API keys to Vercel Environment Variables.</p>
+            <div className="space-y-2 text-sm text-slate-600">
+              <p className="font-medium text-navy-700">Required Environment Variables:</p>
+              <div className="bg-slate-50 rounded-lg p-3 font-mono text-xs space-y-1">
+                <p>ENCRYPTION_KEY=<span className="text-slate-400">(any random string)</span></p>
+                <p>INSTAGRAM_CLIENT_ID / SECRET=<span className="text-slate-400">(Meta Developer Portal)</span></p>
+                <p>TWITTER_CLIENT_ID / SECRET=<span className="text-slate-400">(X Developer Portal)</span></p>
+                <p>FACEBOOK_APP_ID / SECRET=<span className="text-slate-400">(Meta Developer Portal)</span></p>
+                <p>TIKTOK_CLIENT_KEY / SECRET=<span className="text-slate-400">(TikTok Developer Portal)</span></p>
+              </div>
             </div>
           </div>
         </div>
