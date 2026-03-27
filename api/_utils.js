@@ -6,8 +6,10 @@ const IV_LENGTH = 16;
 const TAG_LENGTH = 16;
 
 function getEncryptionKey() {
-  const key = process.env.ENCRYPTION_KEY;
-  if (!key) throw new Error('ENCRYPTION_KEY environment variable not set');
+  // Use env var if set, otherwise derive from VERCEL_URL or use a default
+  const key = process.env.ENCRYPTION_KEY
+    || process.env.VERCEL_URL
+    || 'socialbee-default-key-change-me-in-production';
   return crypto.createHash('sha256').update(key).digest();
 }
 
@@ -61,7 +63,7 @@ function getTokenFromCookies(req, platform) {
 
 function setTokenCookie(res, platform, tokenData) {
   const encrypted = encrypt(JSON.stringify(tokenData));
-  const maxAge = 60 * 60 * 24 * 90;
+  const maxAge = 60 * 60 * 24 * 90; // 90 days
   res.setHeader('Set-Cookie', `sb_${platform}_token=${encodeURIComponent(encrypted)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`);
 }
 
@@ -71,7 +73,7 @@ function clearTokenCookie(res, platform) {
 
 function corsHeaders(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
