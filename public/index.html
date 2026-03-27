@@ -1,13 +1,13 @@
-h<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SocialBee — AI Social Media Manager for The Wichitan</title>
+  <title>SocialBee — AI Social Media Manager</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐝</text></svg>">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = {hh
+    tailwind.config = {
       theme: {
         extend: {
           colors: {
@@ -71,17 +71,17 @@ h<!DOCTYPE html>
         facebook: { avgEngagement: "0.15%", goal: "0.5%+" }
       },
       captionTemplates: {
-        breaking: { template: "🚨 [BREAKING] {headline}. {context}. Full story → link in bio.", example: "🚨 [BREAKING] MSU announces new parking policy. All student lots affected starting May. Full story → link in bio." },
+        breaking: { template: "🚨 [BREAKING] {headline}. {context}. Full story → link in bio.", example: "🚨 [BREAKING] New campus parking policy announced. All student lots affected starting May. Full story → link in bio." },
         opinion: { template: "{hot_take}. Here's why → {brief_reason}. What do you think? 👇", example: "Unpopular opinion: 8 AM classes should be banned. Here's why → Studies show students retain 40% less before 9 AM. What do you think? 👇" },
         spotlight: { template: "Meet {name}, a {year} {major} who {interesting_fact}. {quote}. 🎓 More student stories → follow us!", example: "Meet Jordan, a junior art major who painted a 30ft mural on campus. \"I wanted everyone to feel seen.\" 🎓 More student stories → follow us!" },
         event: { template: "📅 {event_name} is {timing}! {details}. Don't miss it → {cta}", example: "📅 Spring Fest is THIS Friday! Live music, food trucks, and free merch. Don't miss it → Tag who you're bringing! 👇" },
-        carousel: { template: "{number_hook} about {topic} that every MSU student should know 🧵👇 [Swipe →]", example: "5 things about the new dining hall that every MSU student should know 🧵👇 [Swipe →]" }
+        carousel: { template: "{number_hook} about {topic} that every student should know 🧵👇 [Swipe →]", example: "5 things about the new dining hall that every student should know 🧵👇 [Swipe →]" }
       },
       ctas: {
         engagement: ["Tag someone who needs to see this", "Double-tap if you agree 💛", "Save this for later 📌", "Comment your take below 👇", "Share to your story if this hits home"],
-        growth: ["Follow @thewichitan for more campus news", "Turn on post notifications 🔔", "Share with a Mustang who needs to know"],
-        traffic: ["Full story → link in bio", "Read more at thewichitan.com", "Swipe up for the full article"],
-        tiktok: ["Follow for more MSU content", "Comment what you think", "Share with your roommate", "Stitch this with your take"]
+        growth: ["Follow us for more updates", "Turn on post notifications 🔔", "Share with someone who needs to know"],
+        traffic: ["Full story → link in bio", "Read more on our website", "Swipe up for the full article"],
+        tiktok: ["Follow for more content", "Comment what you think", "Share with your roommate", "Stitch this with your take"]
       }
     };
 
@@ -89,15 +89,15 @@ h<!DOCTYPE html>
       {
         id: "d1", title: "Spring Fest 2026 Lineup Announcement", type: "event", status: "draft",
         platforms: ["instagram", "twitter", "facebook", "tiktok"],
-        caption: "📅 Spring Fest 2026 is HERE! 🎉 This year's lineup includes live performances, food trucks from 12 local vendors, and a surprise headliner reveal at 8 PM. Don't miss Wichita Falls' biggest campus event!\n\nTag who you're bringing! 👇\n\n#MSUTexas #SpringFest2026 #TheWichitan #CampusLife",
+        caption: "📅 Spring Fest 2026 is HERE! 🎉 This year's lineup includes live performances, food trucks from 12 local vendors, and a surprise headliner reveal at 8 PM. Don't miss the biggest campus event of the year!\n\nTag who you're bringing! 👇\n\n#SpringFest2026 #CampusLife #CollegeEvents",
         imagePrompt: "Vibrant college spring festival poster with navy blue and gold colors, showing crowds of happy students, food trucks, and a stage with lights, modern graphic design style",
         scheduledTime: null, createdAt: "2026-03-25T10:00:00", contentFormula: "Event Announcement",
         viralScore: 87, suggestedTime: "Thursday 1:00 PM", aiNotes: "High engagement potential — events + lineup reveals drive saves and shares. Use carousel format on Instagram for maximum reach."
       },
       {
-        id: "d2", title: "Opinion: Why MSU Needs More Study Spaces", type: "opinion", status: "draft",
+        id: "d2", title: "Opinion: Why We Need More Study Spaces", type: "opinion", status: "draft",
         platforms: ["instagram", "twitter"],
-        caption: "Unpopular opinion: MSU doesn't have enough study spaces — and it's hurting student performance. 📚\n\nWith finals approaching, the library is packed by 10 AM. Here's what students are saying about the crisis, and what the university could do about it.\n\nWhat's your go-to study spot? Comment below 👇\n\nFull story → link in bio\n\n#MSUTexas #StudentLife #TheWichitan #CampusIssues",
+        caption: "Unpopular opinion: Our campus doesn't have enough study spaces — and it's hurting student performance. 📚\n\nWith finals approaching, the library is packed by 10 AM. Here's what students are saying about the crisis, and what the university could do about it.\n\nWhat's your go-to study spot? Comment below 👇\n\nFull story → link in bio\n\n#StudentLife #CampusIssues #CollegeLife",
         imagePrompt: "Crowded university library with students studying at every table, some sitting on floors, editorial photography style with navy blue overlay",
         scheduledTime: null, createdAt: "2026-03-25T14:00:00", contentFormula: "Opinion / Hot Take",
         viralScore: 92, suggestedTime: "Wednesday 1:00 PM", aiNotes: "Opinion pieces with relatable campus issues drive highest comment engagement. The question CTA will boost algorithm ranking."
@@ -105,7 +105,7 @@ h<!DOCTYPE html>
       {
         id: "d3", title: "Student Spotlight: Maya Chen - Campus Muralist", type: "spotlight", status: "approved",
         platforms: ["instagram", "tiktok"],
-        caption: "Meet Maya Chen, a junior art major who's transforming campus one wall at a time. 🎨\n\nHer latest piece — a 30ft mural outside the student center — took 3 weeks and 47 cans of spray paint. \"I wanted every student to feel represented when they walk by.\"\n\nKnow someone doing amazing things on campus? Tag them below! 👇\n\n#MSUTexas #StudentSpotlight #CampusArt #TheWichitan",
+        caption: "Meet Maya Chen, a junior art major who's transforming campus one wall at a time. 🎨\n\nHer latest piece — a 30ft mural outside the student center — took 3 weeks and 47 cans of spray paint. \"I wanted every student to feel represented when they walk by.\"\n\nKnow someone doing amazing things on campus? Tag them below! 👇\n\n#StudentSpotlight #CampusArt #CollegeCreatives",
         imagePrompt: "Young female college student painting a large colorful mural on a university building wall, vibrant colors, editorial photography",
         scheduledTime: "2026-03-27T13:00:00", createdAt: "2026-03-24T09:00:00", contentFormula: "Student Spotlight",
         viralScore: 78, suggestedTime: "Thursday 1:00 PM", aiNotes: "Student spotlights build community loyalty. Pair with a short TikTok reel of the painting process for maximum cross-platform reach."
@@ -212,7 +212,7 @@ h<!DOCTYPE html>
             {sidebarOpen && (
               <div className="fade-in">
                 <h1 className="font-bold text-lg leading-tight">SocialBee</h1>
-                <p className="text-xs text-blue-200 opacity-70">The Wichitan AI</p>
+                <p className="text-xs text-blue-200 opacity-70">AI Social Manager</p>
               </div>
             )}
           </div>
@@ -318,7 +318,7 @@ h<!DOCTYPE html>
         <div className="fade-in space-y-6">
           <div>
             <h2 className="text-2xl font-bold text-navy-800">Welcome back, Shehan</h2>
-            <p className="text-slate-500 mt-1">Here's how The Wichitan is performing across platforms.</p>
+            <p className="text-slate-500 mt-1">Here's how your brand is performing across platforms.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -427,6 +427,10 @@ h<!DOCTYPE html>
       const [tone, setTone] = useState("informative");
       const [generating, setGenerating] = useState(false);
       const [generated, setGenerated] = useState(null);
+      const [imageUrl, setImageUrl] = useState("");
+      const [imagePreview, setImagePreview] = useState(null);
+      const [generatingGraphic, setGeneratingGraphic] = useState(false);
+      const canvasRef = useRef(null);
 
       const contentTypes = [
         { id: "news", label: "Breaking News", icon: "zap" },
@@ -443,6 +447,118 @@ h<!DOCTYPE html>
         setSelectedPlatforms(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
       };
 
+      const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            setImagePreview(ev.target.result);
+            setImageUrl(ev.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+
+      const generateGraphic = () => {
+        if (!topic.trim()) return;
+        setGeneratingGraphic(true);
+        setTimeout(() => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 1080;
+          canvas.height = 1080;
+          const ctx = canvas.getContext('2d');
+
+          // Background gradient
+          const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1080);
+          const colorSchemes = [
+            ['#1e3a8a', '#3b82f6', '#60a5fa'],
+            ['#0f172a', '#1e3a8a', '#3b82f6'],
+            ['#1e3a8a', '#7c3aed', '#a855f7'],
+            ['#0c4a6e', '#0284c7', '#38bdf8'],
+            ['#1e3a8a', '#059669', '#34d399']
+          ];
+          const scheme = colorSchemes[Math.floor(Math.random() * colorSchemes.length)];
+          bgGrad.addColorStop(0, scheme[0]);
+          bgGrad.addColorStop(0.5, scheme[1]);
+          bgGrad.addColorStop(1, scheme[2]);
+          ctx.fillStyle = bgGrad;
+          ctx.fillRect(0, 0, 1080, 1080);
+
+          // Decorative circles
+          for (let i = 0; i < 6; i++) {
+            ctx.beginPath();
+            ctx.arc(
+              Math.random() * 1080,
+              Math.random() * 1080,
+              50 + Math.random() * 150,
+              0, Math.PI * 2
+            );
+            ctx.fillStyle = `rgba(255,255,255,${0.03 + Math.random() * 0.06})`;
+            ctx.fill();
+          }
+
+          // Diagonal accent lines
+          ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+          ctx.lineWidth = 2;
+          for (let i = 0; i < 8; i++) {
+            ctx.beginPath();
+            ctx.moveTo(-100 + i * 180, 0);
+            ctx.lineTo(200 + i * 180, 1080);
+            ctx.stroke();
+          }
+
+          // Content type badge
+          const badges = { news: 'BREAKING', opinion: 'OPINION', spotlight: 'SPOTLIGHT', event: 'EVENT', carousel: 'EXPLAINER', behindscenes: 'BTS' };
+          const badge = badges[contentType] || 'POST';
+          ctx.fillStyle = 'rgba(251,191,36,0.9)';
+          ctx.beginPath();
+          ctx.roundRect(60, 60, ctx.measureText(badge).width * 1.8 + 60, 52, 12);
+          ctx.fill();
+          ctx.font = 'bold 24px Inter, sans-serif';
+          ctx.fillStyle = '#0f172a';
+          ctx.textAlign = 'left';
+          ctx.fillText(badge, 90, 94);
+
+          // Main text
+          ctx.fillStyle = 'white';
+          ctx.font = 'bold 56px Inter, sans-serif';
+          ctx.textAlign = 'left';
+          const words = topic.split(' ');
+          let line = '';
+          let y = 380;
+          const maxWidth = 920;
+          const lineHeight = 70;
+          for (const word of words) {
+            const test = line + word + ' ';
+            if (ctx.measureText(test).width > maxWidth && line) {
+              ctx.fillText(line.trim(), 80, y);
+              line = word + ' ';
+              y += lineHeight;
+              if (y > 700) break;
+            } else {
+              line = test;
+            }
+          }
+          if (line.trim() && y <= 700) ctx.fillText(line.trim(), 80, y);
+
+          // Bottom bar
+          ctx.fillStyle = 'rgba(0,0,0,0.3)';
+          ctx.fillRect(0, 980, 1080, 100);
+          ctx.fillStyle = 'rgba(251,191,36,1)';
+          ctx.font = 'bold 28px Inter, sans-serif';
+          ctx.fillText('SocialBee', 80, 1042);
+          ctx.fillStyle = 'rgba(255,255,255,0.7)';
+          ctx.font = '20px Inter, sans-serif';
+          ctx.textAlign = 'right';
+          ctx.fillText(new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), 1000, 1042);
+
+          const dataUrl = canvas.toDataURL('image/png');
+          setImagePreview(dataUrl);
+          setImageUrl(dataUrl);
+          setGeneratingGraphic(false);
+        }, 1500);
+      };
+
       const generateContent = () => {
         if (!topic.trim()) return;
         setGenerating(true);
@@ -452,12 +568,12 @@ h<!DOCTYPE html>
           const tmpl = templates[typeMap[contentType]] || templates.breaking;
 
           const captions = {
-            news: `🚨 [BREAKING] ${topic}\n\nThis is developing — here's what we know so far. MSU students are already reacting, and administration has yet to comment.\n\nStay tuned for updates. Full story → link in bio.\n\nWhat's your reaction? Drop it below 👇\n\n#MSUTexas #TheWichitan #BreakingNews #CampusNews`,
-            opinion: `Hot take: ${topic} — and here's why it matters more than you think. 🔥\n\nWe break down both sides, but one argument is clearly winning. The data doesn't lie.\n\nAgree or disagree? Let us know in the comments 👇\n\nFull opinion piece → link in bio\n\n#MSUTexas #TheWichitan #Opinion #CampusVoices`,
-            spotlight: `Meet the MSU student who's changing the game. 🌟\n\n${topic}\n\nTheir story is one you won't want to miss — from humble beginnings to campus legend status.\n\nKnow someone doing amazing things? Tag them! 👇\n\n#MSUTexas #TheWichitan #StudentSpotlight #MustangPride`,
-            event: `📅 Mark your calendars, Mustangs!\n\n${topic}\n\nThis is THE event you don't want to miss this semester. Bring your friends, bring your energy.\n\nTag who you're going with! 👇\n\n#MSUTexas #TheWichitan #CampusEvents #MustangLife`,
-            carousel: `Here's everything you need to know about ${topic} 🧵👇\n\n[Swipe through for the full breakdown →]\n\nWe compiled the facts so you don't have to. Save this post for later!\n\n📌 Save · 💬 Comment · 📤 Share\n\n#MSUTexas #TheWichitan #InfoThread #KnowledgeIsPower`,
-            behindscenes: `Ever wonder what goes into covering ${topic}? 👀\n\nHere's a peek behind the curtain at The Wichitan newsroom. It takes a team of passionate student journalists to bring you the stories that matter.\n\nWant to join us? DM us! 🐝\n\n#MSUTexas #TheWichitan #BehindTheScenes #StudentJournalism`
+            news: `🚨 [BREAKING] ${topic}\n\nThis is developing — here's what we know so far. Students are already reacting, and the response has been overwhelming.\n\nStay tuned for updates. Full story → link in bio.\n\nWhat's your reaction? Drop it below 👇\n\n#BreakingNews #SocialBee #Trending`,
+            opinion: `Hot take: ${topic} — and here's why it matters more than you think. 🔥\n\nWe break down both sides, but one argument is clearly winning. The data doesn't lie.\n\nAgree or disagree? Let us know in the comments 👇\n\nFull opinion piece → link in bio\n\n#HotTake #Opinion #Trending`,
+            spotlight: `Meet the person who's changing the game. 🌟\n\n${topic}\n\nTheir story is one you won't want to miss — from humble beginnings to legend status.\n\nKnow someone doing amazing things? Tag them! 👇\n\n#Spotlight #Inspiration #Community`,
+            event: `📅 Mark your calendars!\n\n${topic}\n\nThis is THE event you don't want to miss. Bring your friends, bring your energy.\n\nTag who you're going with! 👇\n\n#Events #DontMissOut #Community`,
+            carousel: `Here's everything you need to know about ${topic} 🧵👇\n\n[Swipe through for the full breakdown →]\n\nWe compiled the facts so you don't have to. Save this post for later!\n\n📌 Save · 💬 Comment · 📤 Share\n\n#InfoThread #KnowledgeIsPower #Explainer`,
+            behindscenes: `Ever wonder what goes into covering ${topic}? 👀\n\nHere's a peek behind the curtain. It takes a passionate team to bring you the stories that matter.\n\nWant to join us? DM us! 🐝\n\n#BehindTheScenes #ContentCreation #BTS`
           };
 
           const viralScores = { news: 88, opinion: 92, spotlight: 78, event: 85, carousel: 90, behindscenes: 74 };
@@ -468,8 +584,8 @@ h<!DOCTYPE html>
             viralScore: viralScores[contentType] + Math.floor(Math.random() * 8 - 4),
             suggestedTime: suggestedTimes[contentType],
             contentFormula: contentTypes.find(c => c.id === contentType)?.label,
-            imagePrompt: `Modern, eye-catching social media graphic for ${topic}, featuring navy blue and white color scheme with accent blue highlights, professional editorial style for a university newspaper, The Wichitan MSU Texas branding`,
-            hashtags: ["#MSUTexas", "#TheWichitan", "#CampusLife", "#WichitaFalls"],
+            imagePrompt: `Modern, eye-catching social media graphic for ${topic}, featuring navy blue and white color scheme with accent blue highlights, professional editorial style, clean and bold design`,
+            hashtags: ["#SocialBee", "#ContentCreator", "#SocialMedia", "#Trending"],
             aiNotes: `This ${contentType} post is optimized for ${selectedPlatforms.map(p => PLATFORM_ICONS[p]?.name).join(', ')}. ${contentType === 'carousel' ? 'Carousel format on Instagram will drive saves and extended reach.' : ''} ${contentType === 'opinion' ? 'Opinion content drives highest comment engagement — the question CTA will boost algorithm ranking.' : ''} Post during suggested time for 23% higher completion rate.`
           });
           setGenerating(false);
@@ -486,6 +602,7 @@ h<!DOCTYPE html>
           platforms: selectedPlatforms,
           caption: generated.caption,
           imagePrompt: generated.imagePrompt,
+          imageUrl: imagePreview || null,
           scheduledTime: null,
           createdAt: new Date().toISOString(),
           contentFormula: generated.contentFormula,
@@ -496,6 +613,8 @@ h<!DOCTYPE html>
         setDrafts(prev => [newDraft, ...prev]);
         setGenerated(null);
         setTopic("");
+        setImagePreview(null);
+        setImageUrl("");
       };
 
       return (
@@ -513,7 +632,7 @@ h<!DOCTYPE html>
               <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-5">
                 <div>
                   <label className="block text-sm font-semibold text-navy-800 mb-2">What's the story?</label>
-                  <textarea value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. MSU announces new dining hall renovations starting Fall 2026..."
+                  <textarea value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. New dining hall renovations starting Fall 2026, product launch, event recap..."
                     className="w-full p-4 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-500 focus:border-accent-500 outline-none resize-none transition-all" rows={3} />
                 </div>
 
@@ -555,6 +674,36 @@ h<!DOCTYPE html>
                           tone === t ? 'border-accent-500 bg-accent-50 text-accent-700' : 'border-slate-200 text-slate-600 hover:border-slate-300'
                         }`}>{t}</button>
                     ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-navy-800 mb-2">Image / Graphic</label>
+                  <div className="space-y-3">
+                    {imagePreview && (
+                      <div className="relative">
+                        <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-xl border border-slate-200" />
+                        <button onClick={() => { setImagePreview(null); setImageUrl(""); }}
+                          className="absolute top-2 right-2 w-7 h-7 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70">
+                          <Icon name="x" size={14} />
+                        </button>
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-slate-200 text-sm text-slate-600 font-medium cursor-pointer hover:border-accent-300 hover:bg-accent-50 transition-all">
+                        <Icon name="image" size={16} /> Upload Image
+                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                      </label>
+                      <button onClick={generateGraphic} disabled={!topic.trim() || generatingGraphic}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-accent-200 text-sm text-accent-700 font-medium hover:bg-accent-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        {generatingGraphic ? <><span className="w-4 h-4 border-2 border-accent-300 border-t-accent-700 rounded-full spin-slow" /> Generating...</> : <><Icon name="sparkle" size={16} /> Generate Graphic</>}
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-400">or paste URL:</span>
+                      <input type="text" value={imageUrl && !imageUrl.startsWith('data:') ? imageUrl : ''} onChange={e => { setImageUrl(e.target.value); setImagePreview(e.target.value); }}
+                        placeholder="https://example.com/image.jpg" className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-accent-500 outline-none" />
+                    </div>
                   </div>
                 </div>
 
@@ -613,6 +762,12 @@ h<!DOCTYPE html>
                     <div className="bg-slate-50 rounded-xl p-4">
                       <pre className="whitespace-pre-wrap text-sm text-slate-700 font-sans leading-relaxed">{generated.caption}</pre>
                     </div>
+
+                    {imagePreview && (
+                      <div className="rounded-xl overflow-hidden border border-slate-200">
+                        <img src={imagePreview} alt="Post graphic" className="w-full h-56 object-cover" />
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-accent-50 rounded-xl p-3">
@@ -679,11 +834,11 @@ h<!DOCTYPE html>
             if (d.id !== id) return d;
             let newCaption = d.caption;
             if (editPrompt.toLowerCase().includes("shorter")) {
-              newCaption = d.caption.split('\n').slice(0, 3).join('\n') + "\n\n#MSUTexas #TheWichitan";
+              newCaption = d.caption.split('\n').slice(0, 3).join('\n') + "\n\n#SocialBee #Trending";
             } else if (editPrompt.toLowerCase().includes("emoji")) {
               newCaption = d.caption.replace(/\./g, '. ✨').replace(/!/, '! 🔥');
             } else if (editPrompt.toLowerCase().includes("formal")) {
-              newCaption = d.caption.replace(/🚨|🔥|👇|📅|🎉|💬|💤|📌|🤏|👀|🐝|🌟|🎨/g, '').trim();
+              newCaption = d.caption.replace(/🚨|🔥|👇|📅|🎉|💬|📤|📌|🧵|👀|🐝|🌟|🎨/g, '').trim();
             } else {
               newCaption = `[Updated based on: "${editPrompt}"]\n\n` + d.caption;
             }
@@ -788,7 +943,7 @@ h<!DOCTYPE html>
                     {draft.status === 'draft' && (
                       <>
                         <button onClick={() => approveDraft(draft.id)} className="gradient-navy text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 hover:opacity-90 shadow-md">
-                          <Icon name="check" size={14} />> Approve & Schedule
+                          <Icon name="check" size={14} /> Approve & Schedule
                         </button>
                         <button onClick={() => rejectDraft(draft.id)} className="px-4 py-2.5 rounded-xl border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 flex items-center gap-2">
                           <Icon name="x" size={14} /> Reject
@@ -1160,19 +1315,19 @@ h<!DOCTYPE html>
               ))}
 
               <div className="bg-gradient-to-r from-navy-500 to-accent-600 rounded-2xl p-6 text-white">
-                <h4 className="font-bold text-lg mb-3">The Wichitan's Competitive Advantage</h4>
+                <h4 className="font-bold text-lg mb-3">Your Competitive Advantage</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-white/10 rounded-xl p-4">
                     <p className="font-semibold mb-1">Authenticity First</p>
-                    <p className="text-sm text-blue-100">Rough, real student content outperforms polished corporate content by a wide margin with college audiences.</p>
+                    <p className="text-sm text-blue-100">Raw, authentic content outperforms polished corporate content by a wide margin with young audiences.</p>
                   </div>
                   <div className="bg-white/10 rounded-xl p-4">
                     <p className="font-semibold mb-1">TikTok Gap</p>
-                    <p className="text-sm text-blue-100">Most college newspapers have weak TikTok presence. Early movers get 7x higher engagement than Instagram.</p>
+                    <p className="text-sm text-blue-100">Most competitors have weak TikTok presence. Early movers get 7x higher engagement than Instagram.</p>
                   </div>
                   <div className="bg-white/10 rounded-xl p-4">
                     <p className="font-semibold mb-1">Local Authority</p>
-                    <p className="text-sm text-blue-100">No competitor covers MSU Texas and Wichita Falls. Own the local news niche completely.</p>
+                    <p className="text-sm text-blue-100">Own your niche completely. Consistent, AI-optimized posting builds authority faster than competitors.</p>
                   </div>
                 </div>
               </div>
@@ -1196,73 +1351,196 @@ h<!DOCTYPE html>
       const [loading, setLoading] = useState(true);
       const [actionLoading, setActionLoading] = useState(null);
       const [toast, setToast] = useState(null);
+      const [showKeyForm, setShowKeyForm] = useState(null);
+      const [keyInputs, setKeyInputs] = useState({});
+      const [savingKeys, setSavingKeys] = useState(false);
+
+      const checkStatus = async () => {
+        try {
+          const res = await fetch('/api/status');
+          const data = await res.json();
+          const newConns = {};
+          for (const [platform, info] of Object.entries(data.status)) {
+            newConns[platform] = { connected: info.connected, name: info.name || '' };
+          }
+          setConnections(newConns);
+          setConfigured(data.configured || {});
+        } catch (err) {
+          console.error('Failed to check status:', err);
+        } finally {
+          setLoading(false);
+        }
+      };
 
       useEffect(() => {
-        const checkStatus = async () => {
-          try {
-            const res = await fetch('/api/status');
-            const data = await res.json();
-            const newConns = {};
-            for (const [platform, info] of Object.entries(data.status)) {
-              newConns[platform] = { connected: info.connected, name: info.name || '' };
-            }
-            setConnections(newConns);
-            setConfigured(data.configured || {});
-          } catch (err) { console.error('Failed to check status:', err); }
-          finally { setLoading(false); }
-        };
         const hash = window.location.hash;
         const params = new URLSearchParams(hash.includes('?') ? hash.split('?')[1] : '');
         if (params.get('success')) {
-          const p = params.get('success');
-          setToast({ type: 'success', message: p.charAt(0).toUpperCase() + p.slice(1) + ' connected as ' + (params.get('name') || 'Connected') + '!' });
+          const platform = params.get('success');
+          const name = params.get('name') || 'Connected';
+          setToast({ type: 'success', message: `${platform.charAt(0).toUpperCase() + platform.slice(1)} connected as ${name}!` });
           window.location.hash = '#/connect';
         } else if (params.get('error')) {
-          setToast({ type: 'error', message: 'Connection failed: ' + params.get('error').replace(/_/g, ' ') });
+          const errCode = params.get('error');
+          setToast({ type: 'error', message: `Connection failed: ${errCode.replace(/_/g, ' ')}` });
           window.location.hash = '#/connect';
         }
         checkStatus();
       }, []);
 
       useEffect(() => {
-        if (toast) { const t = setTimeout(() => setToast(null), 5000); return () => clearTimeout(t); }
+        if (toast) {
+          const timer = setTimeout(() => setToast(null), 5000);
+          return () => clearTimeout(timer);
+        }
       }, [toast]);
 
       const handleConnect = (platform) => {
-        if (!configured[platform]) { setToast({ type: 'error', message: platform + ' API keys not configured. Add them in Vercel Environment Variables.' }); return; }
+        if (!configured[platform]) {
+          setShowKeyForm(platform);
+          return;
+        }
         setActionLoading(platform);
-        window.location.href = '/api/auth/' + platform;
+        window.location.href = `/api/auth/${platform}`;
       };
 
       const handleDisconnect = async (platform) => {
         setActionLoading(platform);
-        try { await fetch('/api/disconnect?platform=' + platform); setConnections(prev => ({...prev, [platform]: { connected: false, name: '' }})); setToast({ type: 'success', message: platform.charAt(0).toUpperCase() + platform.slice(1) + ' disconnected.' }); }
-        catch { setToast({ type: 'error', message: 'Failed to disconnect.' }); }
-        finally { setActionLoading(null); }
+        try {
+          await fetch(`/api/disconnect?platform=${platform}`);
+          setConnections(prev => ({ ...prev, [platform]: { connected: false, name: '' } }));
+          setToast({ type: 'success', message: `${platform.charAt(0).toUpperCase() + platform.slice(1)} disconnected.` });
+        } catch (err) {
+          setToast({ type: 'error', message: 'Failed to disconnect.' });
+        } finally {
+          setActionLoading(null);
+        }
+      };
+
+      const saveApiKeys = async (platform) => {
+        const keyMap = platformKeyMap[platform];
+        const keys = {};
+        let allFilled = true;
+        for (const k of keyMap) {
+          const val = keyInputs[k.key] || '';
+          if (!val.trim()) { allFilled = false; break; }
+          keys[k.key] = val.trim();
+        }
+        if (!allFilled) {
+          setToast({ type: 'error', message: 'Please fill in all fields.' });
+          return;
+        }
+        setSavingKeys(true);
+        try {
+          const res = await fetch('/api/config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ keys })
+          });
+          const data = await res.json();
+          if (data.success) {
+            setToast({ type: 'success', message: `${platform.charAt(0).toUpperCase() + platform.slice(1)} API keys saved! You can now connect.` });
+            setShowKeyForm(null);
+            setKeyInputs({});
+            await checkStatus();
+          } else {
+            setToast({ type: 'error', message: data.error || 'Failed to save keys.' });
+          }
+        } catch (err) {
+          setToast({ type: 'error', message: 'Failed to save API keys.' });
+        } finally {
+          setSavingKeys(false);
+        }
+      };
+
+      const platformKeyMap = {
+        instagram: [
+          { key: 'INSTAGRAM_CLIENT_ID', label: 'App ID', hint: 'From Meta Developer Portal → Settings → Basic → App ID' },
+          { key: 'INSTAGRAM_CLIENT_SECRET', label: 'App Secret', hint: 'From Meta Developer Portal → Settings → Basic → App Secret' }
+        ],
+        twitter: [
+          { key: 'TWITTER_CLIENT_ID', label: 'OAuth 2.0 Client ID', hint: 'From X Developer Portal → Your App → Keys & Tokens' },
+          { key: 'TWITTER_CLIENT_SECRET', label: 'OAuth 2.0 Client Secret', hint: 'From X Developer Portal → Your App → Keys & Tokens' }
+        ],
+        facebook: [
+          { key: 'FACEBOOK_APP_ID', label: 'App ID', hint: 'Same as Instagram — From Meta Developer Portal → Settings → Basic' },
+          { key: 'FACEBOOK_APP_SECRET', label: 'App Secret', hint: 'Same as Instagram — From Meta Developer Portal → Settings → Basic' }
+        ],
+        tiktok: [
+          { key: 'TIKTOK_CLIENT_KEY', label: 'Client Key', hint: 'From TikTok Developer Portal → Manage Apps → Your App' },
+          { key: 'TIKTOK_CLIENT_SECRET', label: 'Client Secret', hint: 'From TikTok Developer Portal → Manage Apps → Your App' }
+        ]
       };
 
       const platformDetails = {
-        instagram: { desc: "Share photos, carousels, Reels, and Stories. Best for visual storytelling and community engagement.", features: ["Auto-post photos & carousels", "Schedule Reels", "Story scheduling", "Hashtag optimization"], envKeys: "INSTAGRAM_CLIENT_ID, INSTAGRAM_CLIENT_SECRET" },
-        twitter: { desc: "Real-time news breaking, threads, and quick updates. Primary platform for breaking campus news.", features: ["Auto-post tweets", "Thread scheduling", "Trend monitoring", "Quote tweet management"], envKeys: "TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET" },
-        facebook: { desc: "Reach broader community including alumni, parents, and Wichita Falls locals.", features: ["Page auto-posting", "Event creation", "Community engagement", "Audience insights"], envKeys: "FACEBOOK_APP_ID, FACEBOOK_APP_SECRET" },
-        tiktok: { desc: "Short-form video with highest engagement rates. Best for reaching student audiences.", features: ["Video scheduling", "Trending sound alerts", "Hashtag suggestions", "Performance tracking"], envKeys: "TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET" }
+        instagram: { desc: "Share photos, carousels, Reels, and Stories. Best for visual storytelling and community engagement.", features: ["Auto-post photos & carousels", "Schedule Reels", "Story scheduling", "Hashtag optimization"], portal: "developers.facebook.com" },
+        twitter: { desc: "Real-time news breaking, threads, and quick updates. Primary platform for breaking news.", features: ["Auto-post tweets", "Thread scheduling", "Trend monitoring", "Quote tweet management"], portal: "developer.x.com" },
+        facebook: { desc: "Reach your broader community including alumni, supporters, and local audiences.", features: ["Page auto-posting", "Event creation", "Community engagement", "Audience insights"], portal: "developers.facebook.com" },
+        tiktok: { desc: "Short-form video with highest engagement rates. Best for reaching younger audiences.", features: ["Video scheduling", "Trending sound alerts", "Hashtag suggestions", "Performance tracking"], portal: "developers.tiktok.com" }
       };
 
       return (
         <div className="fade-in space-y-6">
           {toast && (
-            <div className={"fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2 " + (toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white')}>
+            <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2 ${toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
               <Icon name={toast.type === 'success' ? 'check' : 'x'} size={16} />
               {toast.message}
               <button onClick={() => setToast(null)} className="ml-2 opacity-70 hover:opacity-100"><Icon name="x" size={14} /></button>
             </div>
           )}
+
+          {/* API Key Entry Modal */}
+          {showKeyForm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) setShowKeyForm(null); }}>
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden fade-in">
+                <div className="p-6 border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold" style={{background: PLATFORM_ICONS[showKeyForm]?.color}}>
+                        {PLATFORM_ICONS[showKeyForm]?.abbr}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-navy-800">Configure {PLATFORM_ICONS[showKeyForm]?.name}</h3>
+                        <p className="text-xs text-slate-500">Enter your API keys from {platformDetails[showKeyForm]?.portal}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => setShowKeyForm(null)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600"><Icon name="x" size={18} /></button>
+                  </div>
+                </div>
+                <div className="p-6 space-y-4">
+                  {platformKeyMap[showKeyForm]?.map(field => (
+                    <div key={field.key}>
+                      <label className="block text-sm font-medium text-navy-800 mb-1">{field.label}</label>
+                      <input type="text" value={keyInputs[field.key] || ''} onChange={e => setKeyInputs(prev => ({...prev, [field.key]: e.target.value}))}
+                        placeholder={`Paste your ${field.label}...`}
+                        className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-mono focus:ring-2 focus:ring-accent-500 focus:border-accent-500 outline-none transition-all" />
+                      <p className="text-xs text-slate-400 mt-1">{field.hint}</p>
+                    </div>
+                  ))}
+                  {(showKeyForm === 'instagram' || showKeyForm === 'facebook') && (
+                    <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
+                      <p className="text-xs text-blue-700"><strong>Tip:</strong> Instagram and Facebook use the same Meta App. If you've already entered keys for one, the same keys work for both.</p>
+                    </div>
+                  )}
+                </div>
+                <div className="p-6 border-t border-slate-100 flex gap-3">
+                  <button onClick={() => saveApiKeys(showKeyForm)} disabled={savingKeys}
+                    className="flex-1 gradient-navy text-white py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50 shadow-lg">
+                    {savingKeys ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin-slow" /> Saving...</> : <><Icon name="check" size={16} /> Save & Continue</>}
+                  </button>
+                  <button onClick={() => setShowKeyForm(null)} className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50">Cancel</button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div>
             <h2 className="text-2xl font-bold text-navy-800 flex items-center gap-2">
               <Icon name="link" size={24} className="text-accent-500" /> Connect Platforms
             </h2>
             <p className="text-slate-500 mt-1">Link your social media accounts for parallel posting and scheduling.</p>
           </div>
+
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="w-8 h-8 border-3 border-accent-200 border-t-accent-600 rounded-full spin-slow"></div>
@@ -1274,8 +1552,9 @@ h<!DOCTYPE html>
                 const isConnected = connections[platform]?.connected;
                 const isConfigured = configured[platform];
                 const isLoading = actionLoading === platform;
+
                 return (
-                  <div key={platform} className={"bg-white rounded-2xl border shadow-sm overflow-hidden transition-all hover:shadow-md " + (isConnected ? 'border-emerald-200' : !isConfigured ? 'border-amber-200' : 'border-slate-100')}>
+                  <div key={platform} className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all hover:shadow-md ${isConnected ? 'border-emerald-200' : 'border-slate-100'}`}>
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -1285,25 +1564,31 @@ h<!DOCTYPE html>
                           <div>
                             <h3 className="font-semibold text-navy-800">{PLATFORM_ICONS[platform]?.name}</h3>
                             {isConnected && <p className="text-xs text-emerald-600 font-medium">{connections[platform].name} · Connected</p>}
-                            {!isConfigured && !isConnected && <p className="text-xs text-amber-600 font-medium">API keys not configured</p>}
+                            {!isConnected && isConfigured && <p className="text-xs text-accent-600 font-medium">Keys saved · Ready to connect</p>}
+                            {!isConnected && !isConfigured && <p className="text-xs text-slate-400 font-medium">Not configured yet</p>}
                           </div>
                         </div>
-                        {isConnected ? (
-                          <button onClick={() => handleDisconnect(platform)} disabled={isLoading} className="px-4 py-2 rounded-xl text-sm font-medium transition-all bg-emerald-100 text-emerald-700 hover:bg-red-100 hover:text-red-700 disabled:opacity-50">
-                            {isLoading ? 'Disconnecting...' : 'Disconnect'}
-                          </button>
-                        ) : (
-                          <button onClick={() => handleConnect(platform)} disabled={isLoading} className={"px-4 py-2 rounded-xl text-sm font-medium transition-all " + (isConfigured ? 'gradient-navy text-white hover:opacity-90 shadow-md' : 'bg-slate-100 text-slate-400 cursor-not-allowed')}>
-                            {isLoading ? 'Connecting...' : 'Connect'}
-                          </button>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {!isConnected && (
+                            <button onClick={() => setShowKeyForm(platform)}
+                              className="px-3 py-2 rounded-xl text-xs font-medium transition-all border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1">
+                              <Icon name="settings" size={12} /> {isConfigured ? 'Edit Keys' : 'Add Keys'}
+                            </button>
+                          )}
+                          {isConnected ? (
+                            <button onClick={() => handleDisconnect(platform)} disabled={isLoading}
+                              className="px-4 py-2 rounded-xl text-sm font-medium transition-all bg-emerald-100 text-emerald-700 hover:bg-red-100 hover:text-red-700 disabled:opacity-50">
+                              {isLoading ? 'Disconnecting...' : 'Disconnect'}
+                            </button>
+                          ) : (
+                            <button onClick={() => handleConnect(platform)} disabled={isLoading || !isConfigured}
+                              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${isConfigured ? 'gradient-navy text-white hover:opacity-90 shadow-md' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}>
+                              {isLoading ? 'Connecting...' : 'Connect'}
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <p className="text-sm text-slate-600 mb-4">{details.desc}</p>
-                      {!isConfigured && !isConnected && (
-                        <div className="mb-3 px-3 py-2 bg-amber-50 rounded-lg border border-amber-100">
-                          <p className="text-xs text-amber-700">Add env vars in Vercel: <span className="font-mono font-medium">{details.envKeys}</span></p>
-                        </div>
-                      )}
                       <div className="space-y-1.5">
                         {details.features.map((f, i) => (
                           <div key={i} className="flex items-center gap-2 text-sm text-slate-600">
@@ -1323,10 +1608,11 @@ h<!DOCTYPE html>
               })}
             </div>
           )}
+
           <div className="bg-gradient-to-r from-accent-50 to-blue-50 rounded-2xl p-6 border border-accent-100">
             <h4 className="font-semibold text-navy-800 mb-2">How Parallel Posting Works</h4>
-            <p className="text-sm text-slate-600 mb-4">When you approve a draft, SocialBee automatically adapts and schedules it for each connected platform at the optimal time.</p>
-            <div className="flex items-center gap-3 text-sm">
+            <p className="text-sm text-slate-600 mb-4">When you approve a draft, SocialBee automatically adapts and schedules it for each connected platform at the optimal time. Captions, hashtags, and formats are adjusted per platform.</p>
+            <div className="flex items-center gap-3 text-sm flex-wrap">
               <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg"><Icon name="sparkle" size={14} className="text-bee-500" /> AI generates</div>
               <Icon name="arrowRight" size={14} className="text-slate-400" />
               <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg"><Icon name="check" size={14} className="text-emerald-500" /> You approve</div>
@@ -1334,17 +1620,52 @@ h<!DOCTYPE html>
               <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg"><Icon name="send" size={14} className="text-accent-500" /> Auto-posts everywhere</div>
             </div>
           </div>
+
           <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-            <h4 className="font-semibold text-navy-800 mb-3 flex items-center gap-2"><Icon name="sparkle" size={16} className="text-bee-500" /> Setup Guide</h4>
-            <p className="text-sm text-slate-600 mb-4">To connect real accounts, register developer apps on each platform and add API keys to Vercel Environment Variables.</p>
-            <div className="space-y-2 text-sm text-slate-600">
-              <p className="font-medium text-navy-700">Required Environment Variables:</p>
-              <div className="bg-slate-50 rounded-lg p-3 font-mono text-xs space-y-1">
-                <p>ENCRYPTION_KEY=<span className="text-slate-400">(any random string)</span></p>
-                <p>INSTAGRAM_CLIENT_ID / SECRET=<span className="text-slate-400">(Meta Developer Portal)</span></p>
-                <p>TWITTER_CLIENT_ID / SECRET=<span className="text-slate-400">(X Developer Portal)</span></p>
-                <p>FACEBOOK_APP_ID / SECRET=<span className="text-slate-400">(Meta Developer Portal)</span></p>
-                <p>TIKTOK_CLIENT_KEY / SECRET=<span className="text-slate-400">(TikTok Developer Portal)</span></p>
+            <h4 className="font-semibold text-navy-800 mb-3 flex items-center gap-2"><Icon name="info" size={16} className="text-accent-500" /> Quick Setup Guide</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="bg-slate-50 rounded-xl p-4">
+                <p className="font-semibold text-navy-700 mb-2">Instagram & Facebook</p>
+                <p className="text-slate-600 mb-2">Both use the same Meta App:</p>
+                <ol className="space-y-1 text-slate-600 list-decimal list-inside">
+                  <li>Go to developers.facebook.com/apps</li>
+                  <li>Create a new Business app</li>
+                  <li>Add Facebook Login product</li>
+                  <li>Copy App ID and App Secret</li>
+                  <li>Click "Add Keys" above and paste them</li>
+                </ol>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-4">
+                <p className="font-semibold text-navy-700 mb-2">X (Twitter)</p>
+                <p className="text-slate-600 mb-2">Requires a developer account:</p>
+                <ol className="space-y-1 text-slate-600 list-decimal list-inside">
+                  <li>Go to developer.x.com</li>
+                  <li>Create a Project and App</li>
+                  <li>Set up OAuth 2.0 user authentication</li>
+                  <li>Copy Client ID and Client Secret</li>
+                  <li>Click "Add Keys" above and paste them</li>
+                </ol>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-4">
+                <p className="font-semibold text-navy-700 mb-2">TikTok</p>
+                <p className="text-slate-600 mb-2">Register a developer app:</p>
+                <ol className="space-y-1 text-slate-600 list-decimal list-inside">
+                  <li>Go to developers.tiktok.com</li>
+                  <li>Create an app with Login Kit</li>
+                  <li>Add Content Posting API</li>
+                  <li>Copy Client Key and Client Secret</li>
+                  <li>Click "Add Keys" above and paste them</li>
+                </ol>
+              </div>
+              <div className="bg-gradient-to-br from-accent-50 to-blue-50 rounded-xl p-4 border border-accent-100">
+                <p className="font-semibold text-navy-700 mb-2">Callback URLs</p>
+                <p className="text-slate-600 mb-2">Add these redirect URIs in your developer portals:</p>
+                <div className="space-y-1 font-mono text-xs text-slate-600 break-all">
+                  <p>{window.location.origin}/api/auth/callback/instagram</p>
+                  <p>{window.location.origin}/api/auth/callback/twitter</p>
+                  <p>{window.location.origin}/api/auth/callback/facebook</p>
+                  <p>{window.location.origin}/api/auth/callback/tiktok</p>
+                </div>
               </div>
             </div>
           </div>
@@ -1388,8 +1709,8 @@ h<!DOCTYPE html>
                   <Icon name="menu" size={20} className="text-slate-600" />
                 </button>
                 <div>
-                  <h1 className="font-bold text-navy-800 text-sm">The Wichitan</h1>
-                  <p className="text-xs text-slate-400">MSU Texas Student Newspaper</p>
+                  <h1 className="font-bold text-navy-800 text-sm">SocialBee</h1>
+                  <p className="text-xs text-slate-400">AI Social Media Manager</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
