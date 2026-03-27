@@ -1,5 +1,18 @@
 // Returns connection status for all platforms
-const { getTokenFromCookies, corsHeaders } = require('./_utils');
+const { getTokenFromCookies, corsHeaders, parseCookies, decrypt } = require('./_utils');
+
+function getConfigValue(req, key) {
+  if (process.env[key]) return process.env[key];
+  const cookies = parseCookies(req.headers.cookie);
+  const encrypted = cookies['sb_api_config'];
+  if (!encrypted) return null;
+  try {
+    const config = JSON.parse(decrypt(encrypted));
+    return config[key] || null;
+  } catch {
+    return null;
+  }
+}
 
 module.exports = (req, res) => {
   corsHeaders(res);
@@ -22,10 +35,10 @@ module.exports = (req, res) => {
   }
 
   const configured = {
-    instagram: !!(process.env.INSTAGRAM_CLIENT_ID && process.env.INSTAGRAM_CLIENT_SECRET),
-    twitter: !!(process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET),
-    facebook: !!(process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET),
-    tiktok: !!(process.env.TIKTOK_CLIENT_KEY && process.env.TIKTOK_CLIENT_SECRET)
+    instagram: !!(getConfigValue(req, 'INSTAGRAM_CLIENT_ID') && getConfigValue(req, 'INSTAGRAM_CLIENT_SECRET')),
+    twitter: !!(getConfigValue(req, 'TWITTER_CLIENT_ID') && getConfigValue(req, 'TWITTER_CLIENT_SECRET')),
+    facebook: !!(getConfigValue(req, 'FACEBOOK_APP_ID') && getConfigValue(req, 'FACEBOOK_APP_SECRET')),
+    tiktok: !!(getConfigValue(req, 'TIKTOK_CLIENT_KEY') && getConfigValue(req, 'TIKTOK_CLIENT_SECRET'))
   };
 
   res.json({ status, configured });
